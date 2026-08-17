@@ -1,0 +1,2700 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>ContaPro+ ULTRA v2.1</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* ===== ESTILOS COMPLETOS ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f0f4f8;
+            color: #1e293b;
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: 200px;
+            background: #ffffff;
+            border-right: 1px solid #e2e8f0;
+            padding: 16px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 100;
+            transition: width 0.3s ease;
+        }
+        .sidebar-brand {
+            padding: 0 16px 20px 16px;
+            border-bottom: 1px solid #e2e8f0;
+            margin-bottom: 12px;
+        }
+        .sidebar-brand h1 {
+            font-size: 18px;
+            color: #1a73e8;
+            font-weight: 700;
+        }
+        .sidebar-brand span {
+            font-size: 11px;
+            color: #64748b;
+            display: block;
+        }
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.15s;
+            border-left: 3px solid transparent;
+            font-size: 13px;
+            font-weight: 500;
+            gap: 10px;
+        }
+        .nav-item:hover { background: #f1f5f9; color: #1a73e8; }
+        .nav-item.active { background: #e8f0fe; color: #1a73e8; border-left-color: #1a73e8; }
+        .nav-item .icon { font-size: 16px; width: 22px; text-align: center; flex-shrink: 0; }
+        .nav-item .nav-text { white-space: nowrap; }
+        .main-content {
+            margin-left: 200px;
+            flex: 1;
+            padding: 16px 24px 32px 24px;
+            min-height: 100vh;
+        }
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            padding: 12px 20px;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+            border: 1px solid #e2e8f0;
+        }
+        .header-left h2 { font-size: 16px; font-weight: 600; }
+        .empresa-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .empresa-selector select {
+            padding: 6px 14px;
+            border-radius: 6px;
+            border: 1px solid #d1d5db;
+            font-size: 13px;
+            min-width: 160px;
+            background: #ffffff;
+            cursor: pointer;
+        }
+        .btn {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .btn-primary { background: #1a73e8; color: #fff; }
+        .btn-primary:hover { background: #1557b0; }
+        .btn-success { background: #059669; color: #fff; }
+        .btn-success:hover { background: #047857; }
+        .btn-danger { background: #dc2626; color: #fff; }
+        .btn-danger:hover { background: #b91c1c; }
+        .btn-warning { background: #d97706; color: #fff; }
+        .btn-warning:hover { background: #b45309; }
+        .btn-outline { background: transparent; color: #475569; border: 1px solid #d1d5db; }
+        .btn-outline:hover { background: #f1f5f9; }
+        .btn-backup { background: #7c3aed; color: #fff; }
+        .btn-backup:hover { background: #6d28d9; }
+        .btn-sm { padding: 4px 10px; font-size: 11px; }
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            background: #e2e8f0;
+            color: #475569;
+        }
+        .badge-spe { background: #fef3c7; color: #92400e; }
+        .tabs-container {
+            background: #ffffff;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+        }
+        .tabs-header {
+            display: flex;
+            background: #f8fafc;
+            border-bottom: 1px solid #e2e8f0;
+            overflow-x: auto;
+            padding: 0 6px;
+        }
+        .tab-btn {
+            padding: 10px 18px;
+            background: transparent;
+            border: none;
+            font-size: 13px;
+            font-weight: 500;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.15s;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+        }
+        .tab-btn:hover { color: #1a73e8; background: #f1f5f9; }
+        .tab-btn.active { color: #1a73e8; border-bottom-color: #1a73e8; background: #ffffff; }
+        .tab-content { padding: 16px 20px; display: none; }
+        .tab-content.active { display: block; }
+        .card {
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .card-header h3 { font-size: 14px; font-weight: 600; color: #0f172a; }
+        .card-header .subtitle { font-size: 12px; color: #64748b; }
+        .table-wrapper { overflow-x: auto; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+        table th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 600;
+            text-align: left;
+            padding: 8px 12px;
+            border-bottom: 2px solid #e2e8f0;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+        table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        table tr:hover td { background: #fafcff; }
+        .text-right { text-align: right; }
+        .text-center { text-align: center; }
+        .font-mono { font-family: 'Courier New', monospace; font-weight: 500; }
+        .text-muted { color: #64748b; font-size: 12px; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 500;
+            color: #334155;
+            margin-bottom: 3px;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 13px;
+            background: #ffffff;
+            font-family: inherit;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 3px rgba(26, 115, 232, 0.12);
+        }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(3px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal-content {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 24px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            animation: modalIn 0.2s ease;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .modal-content h3 { font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 16px; }
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+        }
+        .estado-financiero {
+            padding: 16px;
+            background: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        .estado-financiero .title { text-align: center; font-size: 18px; font-weight: 700; color: #0f172a; }
+        .estado-financiero .subtitle { text-align: center; font-size: 13px; color: #64748b; margin-bottom: 16px; }
+        .estado-financiero .section-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #0f172a;
+            margin: 12px 0 6px 0;
+            padding-bottom: 3px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        .estado-financiero .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 3px 0;
+            font-size: 13px;
+        }
+        .estado-financiero .row.total {
+            font-weight: 700;
+            border-top: 2px solid #0f172a;
+            padding-top: 6px;
+            margin-top: 3px;
+        }
+        .estado-financiero .row .label { color: #334155; }
+        .estado-financiero .row .value { font-family: 'Courier New', monospace; font-weight: 500; }
+        .estado-financiero .row .value.negative { color: #dc2626; }
+        .estado-financiero .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+            padding: 10px 14px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            align-items: center;
+        }
+        .toolbar .spacer { flex: 1; }
+        .toolbar .filter-group { display: flex; gap: 6px; align-items: center; }
+        .toolbar .filter-group input,
+        .toolbar .filter-group select {
+            padding: 5px 10px;
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+            font-size: 12px;
+        }
+        .movimientos-table td input,
+        .movimientos-table td select {
+            width: 100%;
+            padding: 5px 8px;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            background: #0f172a;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 500;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: all 0.3s ease;
+            max-width: 380px;
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast.success { background: #059669; }
+        .toast.error { background: #dc2626; }
+        .toast.warning { background: #d97706; }
+        .empresa-info {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #475569;
+            background: #f1f5f9;
+            padding: 3px 12px;
+            border-radius: 16px;
+        }
+        .hidden { display: none !important; }
+        .flex { display: flex; }
+        .gap-8 { gap: 8px; }
+        .mt-8 { margin-top: 8px; }
+        .mb-8 { margin-bottom: 8px; }
+        .w-full { width: 100%; }
+        .text-success { color: #059669; }
+        .text-danger { color: #dc2626; }
+        .text-center { text-align: center; }
+
+        .capital-table { font-size: 12px; }
+        .capital-table th { font-size: 10px; }
+        .capital-table td { padding: 6px 10px; }
+        .capital-table .total-row { font-weight: 700; border-top: 3px double #0f172a; }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .sidebar { width: 56px; padding: 8px 0; }
+            .sidebar-brand h1 { font-size: 14px; }
+            .sidebar-brand span { display: none; }
+            .nav-item { padding: 10px 8px; justify-content: center; }
+            .nav-item .nav-text { display: none; }
+            .nav-item .icon { font-size: 20px; width: 32px; }
+            .main-content { margin-left: 56px; padding: 12px; }
+            .form-row { grid-template-columns: 1fr; }
+            .estado-financiero .grid-2 { grid-template-columns: 1fr; gap: 10px; }
+            .top-header { flex-direction: column; align-items: stretch; }
+            .empresa-selector { flex-wrap: wrap; }
+            .empresa-selector select { min-width: 120px; font-size: 12px; }
+            .btn { font-size: 11px; padding: 5px 10px; }
+            .card-header h3 { font-size: 13px; }
+            table { font-size: 11px; }
+            table th, table td { padding: 6px 8px; }
+            .modal-content { padding: 16px; margin: 10px; }
+        }
+
+        @media (max-width: 480px) {
+            .sidebar { width: 48px; }
+            .sidebar-brand h1 { font-size: 12px; }
+            .main-content { margin-left: 48px; padding: 8px; }
+            .top-header { padding: 8px 12px; }
+            .header-left h2 { font-size: 14px; }
+            .empresa-selector select { min-width: 100px; font-size: 11px; padding: 4px 8px; }
+            .btn { font-size: 10px; padding: 4px 8px; }
+            .card { padding: 10px; }
+            .tab-content { padding: 10px 12px; }
+            .toolbar { flex-direction: column; align-items: stretch; }
+            .toolbar .filter-group { flex-wrap: wrap; }
+            .toolbar .filter-group input,
+            .toolbar .filter-group select { font-size: 11px; padding: 4px 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== SIDEBAR ===== -->
+    <nav class="sidebar">
+        <div class="sidebar-brand">
+            <h1>📊 ContaPro+</h1>
+            <span>ULTRA v2.1</span>
+        </div>
+        <div class="nav-item active" data-tab="dashboard">
+            <span class="icon">📈</span>
+            <span class="nav-text">Dashboard</span>
+        </div>
+        <div class="nav-item" data-tab="empresas">
+            <span class="icon">🏢</span>
+            <span class="nav-text">Empresas</span>
+        </div>
+        <div class="nav-item" data-tab="planCuentas">
+            <span class="icon">📚</span>
+            <span class="nav-text">Plan Cuentas</span>
+        </div>
+        <div class="nav-item" data-tab="asientos">
+            <span class="icon">📝</span>
+            <span class="nav-text">Libro Diario</span>
+        </div>
+        <div class="nav-item" data-tab="estados">
+            <span class="icon">📊</span>
+            <span class="nav-text">Estados Financieros</span>
+        </div>
+        <div class="nav-item" data-tab="exportar">
+            <span class="icon">📤</span>
+            <span class="nav-text">Exportar</span>
+        </div>
+        <div class="nav-item" data-tab="respaldo">
+            <span class="icon">💾</span>
+            <span class="nav-text">Respaldos</span>
+        </div>
+    </nav>
+
+    <!-- ===== MAIN ===== -->
+    <div class="main-content" id="app">
+
+        <!-- HEADER -->
+        <header class="top-header">
+            <div class="header-left">
+                <h2 id="pageTitle">📈 Dashboard</h2>
+                <span class="badge" id="empresaBadge" style="display:none;">Sin empresa</span>
+            </div>
+            <div class="empresa-selector">
+                <select id="empresaSelect">
+                    <option value="">-- Seleccionar empresa --</option>
+                </select>
+                <button class="btn btn-primary btn-sm" onclick="abrirModalEmpresa()">➕ Nueva</button>
+                <button class="btn btn-outline btn-sm" onclick="editarEmpresa()">✏️ Editar</button>
+                <button class="btn btn-danger btn-sm" onclick="eliminarEmpresa()">🗑️</button>
+                <span id="empresaInfo" class="empresa-info" style="display:none;">
+                    <span id="empresaNombre"></span>
+                    <span class="badge" id="empresaTipo"></span>
+                    <span class="badge badge-spe" id="empresaSpe" style="display:none;">SPE</span>
+                </span>
+            </div>
+        </header>
+
+        <!-- TABS -->
+        <div class="tabs-container">
+
+            <!-- DASHBOARD -->
+            <div class="tab-content active" id="tab-dashboard">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>📊 Resumen General</h3>
+                        <span class="subtitle" id="dashboardEmpresa">Selecciona una empresa</span>
+                    </div>
+                    <div id="dashboardContent">
+                        <p class="text-muted">Selecciona una empresa para ver el resumen.</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>📋 Últimos Asientos</h3></div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead><tr><th>Fecha</th><th>Descripción</th><th>Total Debe</th><th>Total Haber</th></tr></thead>
+                            <tbody id="ultimosAsientosBody">
+                                <tr><td colspan="4" class="text-muted text-center">No hay asientos</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EMPRESAS -->
+            <div class="tab-content" id="tab-empresas">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>🏢 Empresas</h3>
+                        <button class="btn btn-primary btn-sm" onclick="abrirModalEmpresa()">➕ Nueva</button>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead><tr><th>Nombre</th><th>RIF</th><th>Tipo</th><th>SPE</th><th>Acción</th></tr></thead>
+                            <tbody id="empresasBody">
+                                <tr><td colspan="5" class="text-muted text-center">No hay empresas</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PLAN DE CUENTAS -->
+            <div class="tab-content" id="tab-planCuentas">
+                <div class="toolbar">
+                    <input type="text" id="filtroCuentas" placeholder="🔍 Buscar..." oninput="renderPlanCuentas()" style="padding:5px 10px;border:1px solid #d1d5db;border-radius:4px;font-size:12px;">
+                    <select id="filtroTipoCuenta" onchange="renderPlanCuentas()" style="padding:5px 10px;border:1px solid #d1d5db;border-radius:4px;font-size:12px;">
+                        <option value="">Todos</option>
+                        <option value="ACTIVO">Activo</option>
+                        <option value="PASIVO">Pasivo</option>
+                        <option value="PATRIMONIO">Patrimonio</option>
+                        <option value="INGRESO">Ingreso</option>
+                        <option value="GASTO">Gasto</option>
+                    </select>
+                    <span class="spacer"></span>
+                    <button class="btn btn-primary btn-sm" onclick="abrirModalCuenta()">➕ Nueva Cuenta</button>
+                    <button class="btn btn-success btn-sm" onclick="cargarPlanPredeterminado()">📋 Cargar Predet.</button>
+                </div>
+                <div class="card">
+                    <div class="table-wrapper">
+                        <table>
+                            <thead><tr><th>Código</th><th>Nombre</th><th>Tipo</th><th>Saldo Inicial</th><th>Acciones</th></tr></thead>
+                            <tbody id="planCuentasBody">
+                                <tr><td colspan="5" class="text-muted text-center">Selecciona una empresa</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- LIBRO DIARIO -->
+            <div class="tab-content" id="tab-asientos">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>📝 Registrar Asiento</h3>
+                        <span class="subtitle">Debe = Haber</span>
+                    </div>
+                    <form id="formAsiento" onsubmit="guardarAsiento(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>📅 Fecha</label>
+                                <input type="date" id="asientoFecha" required>
+                            </div>
+                            <div class="form-group">
+                                <label>📝 Descripción</label>
+                                <input type="text" id="asientoDescripcion" placeholder="Descripción del asiento" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>📋 Movimientos</label>
+                            <div class="table-wrapper">
+                                <table class="movimientos-table">
+                                    <thead>
+                                        <tr><th style="width:45%;">Cuenta</th><th style="width:22%;">Debe</th><th style="width:22%;">Haber</th><th style="width:11%;">Acción</th></tr>
+                                    </thead>
+                                    <tbody id="movimientosBody">
+                                        <tr>
+                                            <td><select class="cuenta-select" required><option value="">-- Seleccionar --</option></select></td>
+                                            <td><input type="number" class="debe-input" step="0.01" min="0" value="0" oninput="actualizarTotales()"></td>
+                                            <td><input type="number" class="haber-input" step="0.01" min="0" value="0" oninput="actualizarTotales()"></td>
+                                            <td><button type="button" class="btn btn-danger btn-sm" onclick="eliminarFilaMovimiento(this)">✕</button></td>
+                                        </tr>
+                                    </tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <td><button type="button" class="btn btn-outline btn-sm" onclick="agregarFilaMovimiento()">➕ Agregar</button></td>
+                                            <td class="text-right"><strong id="totalDebe">$0.00</strong></td>
+                                            <td class="text-right"><strong id="totalHaber">$0.00</strong></td>
+                                            <td></td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="4" class="text-center">
+                                                <span id="balanceMsg" style="font-weight:600;font-size:13px;color:#059669;">✅ Balanceado</span>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="modal-actions" style="border-top:none;padding-top:0;">
+                            <button type="submit" class="btn btn-success">💾 Guardar</button>
+                            <button type="reset" class="btn btn-outline" onclick="limpiarFormAsiento()">🔄 Limpiar</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>📋 Historial</h3>
+                        <div class="flex gap-8">
+                            <input type="date" id="filtroFechaDesde" onchange="renderHistorial()" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:4px;font-size:12px;">
+                            <span>a</span>
+                            <input type="date" id="filtroFechaHasta" onchange="renderHistorial()" style="padding:4px 8px;border:1px solid #d1d5db;border-radius:4px;font-size:12px;">
+                        </div>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead><tr><th>Fecha</th><th>Descripción</th><th>Cuentas</th><th>Debe</th><th>Haber</th><th>Acción</th></tr></thead>
+                            <tbody id="historialAsientosBody">
+                                <tr><td colspan="6" class="text-muted text-center">No hay asientos</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ESTADOS FINANCIEROS -->
+            <div class="tab-content" id="tab-estados">
+                <div class="toolbar">
+                    <span class="text-muted">📊 Estados financieros automáticos</span>
+                    <span class="spacer"></span>
+                    <button class="btn btn-success btn-sm" onclick="exportarEstadoExcel()">📊 Excel</button>
+                    <button class="btn btn-primary btn-sm" onclick="exportarEstadoPDF()">📄 PDF</button>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>⚖️ Estado de Situación Financiera</h3></div>
+                    <div id="balanceContainer" class="estado-financiero"><p class="text-muted">Selecciona una empresa</p></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>📈 Estado de Resultados</h3></div>
+                    <div id="resultadosContainer" class="estado-financiero"><p class="text-muted">Selecciona una empresa</p></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>💰 Flujo de Efectivo</h3></div>
+                    <div id="flujoContainer" class="estado-financiero"><p class="text-muted">Selecciona una empresa</p></div>
+                </div>
+                <div class="card">
+                    <div class="card-header"><h3>📊 Cambios en Capital Contable</h3></div>
+                    <div id="capitalContainer" class="estado-financiero"><p class="text-muted">Selecciona una empresa</p></div>
+                </div>
+            </div>
+
+            <!-- EXPORTAR -->
+            <div class="tab-content" id="tab-exportar">
+                <div class="card">
+                    <div class="card-header"><h3>📤 Exportar</h3></div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Módulo</label>
+                            <select id="exportModulo">
+                                <option value="asientos">Libro Diario</option>
+                                <option value="planCuentas">Plan de Cuentas</option>
+                                <option value="balance">Balance General</option>
+                                <option value="resultados">Estado de Resultados</option>
+                                <option value="flujo">Flujo de Efectivo</option>
+                                <option value="capital">Cambios en Capital</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Formato</label>
+                            <select id="exportFormato">
+                                <option value="excel">Excel (.xlsx)</option>
+                                <option value="pdf">PDF (.pdf)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-success" onclick="exportarSeleccionado()">📥 Exportar</button>
+                </div>
+            </div>
+
+            <!-- RESPALDOS -->
+            <div class="tab-content" id="tab-respaldo">
+                <div class="card">
+                    <div class="card-header">
+                        <h3>💾 Respaldo Completo</h3>
+                        <span class="subtitle">Incluye: Empresas · Cuentas · Asientos · Configuración · Licencia</span>
+                    </div>
+                    <div class="form-row" style="margin-bottom:16px;">
+                        <div class="form-group">
+                            <label>📋 Contenido del respaldo</label>
+                            <select id="respaldoTipo">
+                                <option value="completo">🔒 Respaldo Completo (Todo)</option>
+                                <option value="empresas">🏢 Solo Empresas</option>
+                                <option value="contable">📊 Solo Datos Contables</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="display:flex;align-items:flex-end;gap:10px;">
+                            <button class="btn btn-backup" onclick="generarRespaldo()" style="width:100%;">💾 Generar Respaldo</button>
+                            <button class="btn btn-warning" onclick="document.getElementById('restoreFileInput').click()" style="width:100%;">📂 Restaurar</button>
+                            <input type="file" id="restoreFileInput" accept=".json" style="display:none;" onchange="restaurarRespaldo(event)">
+                        </div>
+                    </div>
+                    <div class="card" style="background:#f8fafc;border:1px dashed #94a3b8;">
+                        <p style="font-size:12px;color:#475569;">
+                            <strong>📌 Información del respaldo:</strong><br>
+                            • Formato: JSON (legible y editable)<br>
+                            • Incluye: Empresas, Plan de Cuentas, Asientos, Configuración y Licencia<br>
+                            • Fecha de respaldo: <span id="ultimoRespaldo">No hay respaldo previo</span><br>
+                            • Tamaño estimado: <span id="tamanoRespaldo">---</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-header">
+                        <h3>📋 Historial de Respaldos</h3>
+                        <button class="btn btn-outline btn-sm" onclick="limpiarHistorialRespaldos()">🗑️ Limpiar historial</button>
+                    </div>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead><tr><th>Fecha</th><th>Empresa</th><th>Tamaño</th><th>Registros</th><th>Acciones</th></tr></thead>
+                            <tbody id="historialRespaldosBody">
+                                <tr><td colspan="5" class="text-muted text-center">No hay respaldos guardados</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ===== MODAL EMPRESA ===== -->
+    <div class="modal-overlay" id="modalEmpresa">
+        <div class="modal-content">
+            <h3 id="modalEmpresaTitle">🏢 Nueva Empresa</h3>
+            <form id="formEmpresa" onsubmit="guardarEmpresa(event)">
+                <input type="hidden" id="empresaEditId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nombre *</label>
+                        <input type="text" id="empNombre" placeholder="Mi Empresa C.A." required>
+                    </div>
+                    <div class="form-group">
+                        <label>RIF *</label>
+                        <input type="text" id="empRif" placeholder="J-12345678-9" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tipo</label>
+                        <select id="empTipo">
+                            <option value="comercial">🏬 Comercial</option>
+                            <option value="hoteleria">🏨 Hoteles</option>
+                            <option value="agropecuaria">🌾 Agropecuaria</option>
+                            <option value="construccion">🏗️ Construcción</option>
+                            <option value="condominios">🏢 Condominios</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Período</label>
+                        <input type="month" id="empPeriodo" value="2026-01">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Moneda</label>
+                        <select id="empMoneda">
+                            <option value="VES">Bolívar (VES)</option>
+                            <option value="USD">Dólar (USD)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display:flex;align-items:center;gap:10px;padding-top:18px;">
+                        <label style="margin:0;">🔒 SPE</label>
+                        <input type="checkbox" id="empSpe" style="width:18px;height:18px;cursor:pointer;">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="cerrarModal('modalEmpresa')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">💾 Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== MODAL CUENTA ===== -->
+    <div class="modal-overlay" id="modalCuenta">
+        <div class="modal-content">
+            <h3 id="modalCuentaTitle">📚 Nueva Cuenta</h3>
+            <form id="formCuenta" onsubmit="guardarCuenta(event)">
+                <input type="hidden" id="cuentaEditId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Código *</label>
+                        <input type="text" id="cuentaCodigo" placeholder="1-01-01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nombre *</label>
+                        <input type="text" id="cuentaNombre" placeholder="Caja" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tipo</label>
+                        <select id="cuentaTipo">
+                            <option value="ACTIVO">Activo</option>
+                            <option value="PASIVO">Pasivo</option>
+                            <option value="PATRIMONIO">Patrimonio</option>
+                            <option value="INGRESO">Ingreso</option>
+                            <option value="GASTO">Gasto</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Saldo Inicial</label>
+                        <input type="number" id="cuentaSaldoInicial" step="0.01" value="0">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-outline" onclick="cerrarModal('modalCuenta')">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">💾 Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== TOAST ===== -->
+    <div id="toast" class="toast"></div>
+
+    <!-- ========================================================== -->
+    <!-- JAVASCRIPT - COMPLETO CON TODAS LAS CORRECCIONES            -->
+    <!-- ========================================================== -->
+    <script>
+        // ==========================================================
+        // 1. CONFIGURACIÓN
+        // ==========================================================
+        const DB_NAME = 'ContaProVENNIF';
+        const DB_VERSION = 3;
+
+        let db = null;
+        let empresaActual = null;
+        let datosEmpresa = null;
+        let dbReady = false;
+
+        const PLANES_PREDETERMINADOS = {
+            comercial: [
+                { codigo: '1-01-01', nombre: 'Caja', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '1-01-02', nombre: 'Bancos', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '1-01-03', nombre: 'Clientes', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '1-02-01', nombre: 'Inventarios', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '1-03-01', nombre: 'Propiedades, Planta y Equipo', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '2-01-01', nombre: 'Proveedores', tipo: 'PASIVO', saldoInicial: 0 },
+                { codigo: '2-02-01', nombre: 'Préstamos Bancarios', tipo: 'PASIVO', saldoInicial: 0 },
+                { codigo: '2-03-01', nombre: 'Impuestos por Pagar', tipo: 'PASIVO', saldoInicial: 0 },
+                { codigo: '3-01-01', nombre: 'Capital Social', tipo: 'PATRIMONIO', saldoInicial: 0 },
+                { codigo: '3-02-01', nombre: 'Utilidades Acumuladas', tipo: 'PATRIMONIO', saldoInicial: 0 },
+                { codigo: '4-01-01', nombre: 'Ventas', tipo: 'INGRESO', saldoInicial: 0 },
+                { codigo: '4-02-01', nombre: 'Intereses Ganados', tipo: 'INGRESO', saldoInicial: 0 },
+                { codigo: '5-01-01', nombre: 'Compras', tipo: 'GASTO', saldoInicial: 0 },
+                { codigo: '5-02-01', nombre: 'Gastos de Personal', tipo: 'GASTO', saldoInicial: 0 },
+                { codigo: '5-02-02', nombre: 'Gastos de Administración', tipo: 'GASTO', saldoInicial: 0 },
+                { codigo: '5-02-03', nombre: 'Gastos de Venta', tipo: 'GASTO', saldoInicial: 0 },
+                { codigo: '5-03-01', nombre: 'Gastos Financieros', tipo: 'GASTO', saldoInicial: 0 },
+                { codigo: '5-04-01', nombre: 'Impuestos', tipo: 'GASTO', saldoInicial: 0 },
+            ],
+            hoteleria: [
+                { codigo: '1-01-01', nombre: 'Caja', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '1-01-02', nombre: 'Bancos', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '1-02-01', nombre: 'Habitaciones', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '1-02-02', nombre: 'Mobiliario Hotelero', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '2-01-01', nombre: 'Proveedores Hoteleros', tipo: 'PASIVO', saldoInicial: 0 },
+                { codigo: '3-01-01', nombre: 'Capital Social', tipo: 'PATRIMONIO', saldoInicial: 0 },
+                { codigo: '4-01-01', nombre: 'Hospedaje', tipo: 'INGRESO', saldoInicial: 0 },
+                { codigo: '4-01-02', nombre: 'Alimentos y Bebidas', tipo: 'INGRESO', saldoInicial: 0 },
+                { codigo: '5-01-01', nombre: 'Mantenimiento', tipo: 'GASTO', saldoInicial: 0 },
+                { codigo: '5-01-02', nombre: 'Sueldos Hoteleros', tipo: 'GASTO', saldoInicial: 0 },
+            ],
+            agropecuaria: [
+                { codigo: '1-01-01', nombre: 'Caja', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '1-01-02', nombre: 'Bancos', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '1-02-01', nombre: 'Animales en Pie', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '1-02-02', nombre: 'Cultivos', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '1-03-01', nombre: 'Maquinaria Agrícola', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '2-01-01', nombre: 'Proveedores Agropecuarios', tipo: 'PASIVO', saldoInicial: 0 },
+                { codigo: '3-01-01', nombre: 'Capital Agropecuario', tipo: 'PATRIMONIO', saldoInicial: 0 },
+                { codigo: '4-01-01', nombre: 'Venta de Ganado', tipo: 'INGRESO', saldoInicial: 0 },
+                { codigo: '4-01-02', nombre: 'Venta de Cosechas', tipo: 'INGRESO', saldoInicial: 0 },
+                { codigo: '5-01-01', nombre: 'Alimentos Animales', tipo: 'GASTO', saldoInicial: 0 },
+                { codigo: '5-01-02', nombre: 'Fertilizantes', tipo: 'GASTO', saldoInicial: 0 },
+            ],
+            construccion: [
+                { codigo: '1-01-01', nombre: 'Caja', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '1-01-02', nombre: 'Bancos', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '1-02-01', nombre: 'Materiales', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '1-02-02', nombre: 'Obras en Proceso', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '1-03-01', nombre: 'Equipos de Construcción', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '2-01-01', nombre: 'Proveedores Materiales', tipo: 'PASIVO', saldoInicial: 0 },
+                { codigo: '2-02-01', nombre: 'Anticipos de Clientes', tipo: 'PASIVO', saldoInicial: 0 },
+                { codigo: '3-01-01', nombre: 'Capital', tipo: 'PATRIMONIO', saldoInicial: 0 },
+                { codigo: '4-01-01', nombre: 'Contratos de Obra', tipo: 'INGRESO', saldoInicial: 0 },
+                { codigo: '5-01-01', nombre: 'Mano de Obra', tipo: 'GASTO', saldoInicial: 0 },
+            ],
+            condominios: [
+                { codigo: '1-01-01', nombre: 'Caja', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '1-01-02', nombre: 'Bancos', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '1-01-03', nombre: 'Cuotas por Cobrar', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '1-02-01', nombre: 'Fondo de Reserva', tipo: 'ACTIVO', saldoInicial: 0 },
+                { codigo: '2-01-01', nombre: 'Proveedores Servicios', tipo: 'PASIVO', saldoInicial: 0 },
+                { codigo: '2-02-01', nombre: 'Mantenimiento por Pagar', tipo: 'PASIVO', saldoInicial: 0 },
+                { codigo: '3-01-01', nombre: 'Capital Social', tipo: 'PATRIMONIO', saldoInicial: 0 },
+                { codigo: '4-01-01', nombre: 'Cuotas de Condominio', tipo: 'INGRESO', saldoInicial: 0 },
+                { codigo: '5-01-01', nombre: 'Limpieza', tipo: 'GASTO', saldoInicial: 0 },
+                { codigo: '5-01-02', nombre: 'Vigilancia', tipo: 'GASTO', saldoInicial: 0 },
+            ]
+        };
+
+        // ==========================================================
+        // 2. INDEXEDDB
+        // ==========================================================
+        function abrirDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onupgradeneeded = (e) => {
+                    const d = e.target.result;
+                    if (!d.objectStoreNames.contains('empresas')) {
+                        d.createObjectStore('empresas', { keyPath: 'id' });
+                    }
+                    if (!d.objectStoreNames.contains('planCuentas')) {
+                        const store = d.createObjectStore('planCuentas', { keyPath: 'id' });
+                        store.createIndex('empresaId', 'empresaId', { unique: false });
+                    }
+                    if (!d.objectStoreNames.contains('asientos')) {
+                        const store = d.createObjectStore('asientos', { keyPath: 'id' });
+                        store.createIndex('empresaId', 'empresaId', { unique: false });
+                    }
+                    if (!d.objectStoreNames.contains('configuracion')) {
+                        d.createObjectStore('configuracion', { keyPath: 'key' });
+                    }
+                    if (!d.objectStoreNames.contains('historialRespaldos')) {
+                        d.createObjectStore('historialRespaldos', { keyPath: 'id', autoIncrement: true });
+                    }
+                };
+                request.onsuccess = (e) => {
+                    db = e.target.result;
+                    dbReady = true;
+                    resolve(db);
+                };
+                request.onerror = (e) => { reject(e.target.error); };
+            });
+        }
+
+        function getStore(storeName, mode = 'readonly') {
+            if (!db) throw new Error('Base de datos no abierta');
+            return db.transaction(storeName, mode).objectStore(storeName);
+        }
+
+        function generarId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 4);
+        }
+
+        // ==========================================================
+        // 3. CRUD EMPRESAS
+        // ==========================================================
+        function getEmpresas() {
+            return new Promise((res) => {
+                try {
+                    const store = getStore('empresas');
+                    const req = store.getAll();
+                    req.onsuccess = () => res(req.result || []);
+                    req.onerror = () => res([]);
+                } catch (e) { res([]); }
+            });
+        }
+
+        function guardarEmpresaDB(empresa) {
+            return new Promise((res, rej) => {
+                const store = getStore('empresas', 'readwrite');
+                const req = store.put(empresa);
+                req.onsuccess = () => res(empresa);
+                req.onerror = () => rej(req.error);
+            });
+        }
+
+        function eliminarEmpresaDB(id) {
+            return new Promise((res, rej) => {
+                const store = getStore('empresas', 'readwrite');
+                const req = store.delete(id);
+                req.onsuccess = () => res();
+                req.onerror = () => rej(req.error);
+            });
+        }
+
+        // ==========================================================
+        // 4. CRUD PLAN DE CUENTAS
+        // ==========================================================
+        function getPlanCuentas(empresaId) {
+            return new Promise((res) => {
+                try {
+                    const store = getStore('planCuentas');
+                    const idx = store.index('empresaId');
+                    const req = idx.getAll(empresaId);
+                    req.onsuccess = () => res(req.result || []);
+                    req.onerror = () => res([]);
+                } catch (e) { res([]); }
+            });
+        }
+
+        function guardarCuentaDB(cuenta) {
+            return new Promise((res, rej) => {
+                const store = getStore('planCuentas', 'readwrite');
+                const req = store.put(cuenta);
+                req.onsuccess = () => res(cuenta);
+                req.onerror = () => rej(req.error);
+            });
+        }
+
+        function eliminarCuentaDB(id) {
+            return new Promise((res, rej) => {
+                const store = getStore('planCuentas', 'readwrite');
+                const req = store.delete(id);
+                req.onsuccess = () => res();
+                req.onerror = () => rej(req.error);
+            });
+        }
+
+        async function cargarPlanPredeterminadoParaEmpresa(empId, tipo) {
+            const cuentas = PLANES_PREDETERMINADOS[tipo] || PLANES_PREDETERMINADOS.comercial;
+            for (const c of cuentas) {
+                await guardarCuentaDB({
+                    id: generarId(),
+                    empresaId: empId,
+                    codigo: c.codigo,
+                    nombre: c.nombre,
+                    tipo: c.tipo,
+                    saldoInicial: c.saldoInicial || 0
+                });
+            }
+        }
+
+        // ==========================================================
+        // 5. CRUD ASIENTOS
+        // ==========================================================
+        function getAsientos(empresaId) {
+            return new Promise((res) => {
+                try {
+                    const store = getStore('asientos');
+                    const idx = store.index('empresaId');
+                    const req = idx.getAll(empresaId);
+                    req.onsuccess = () => res(req.result || []);
+                    req.onerror = () => res([]);
+                } catch (e) { res([]); }
+            });
+        }
+
+        function guardarAsientoDB(asiento) {
+            return new Promise((res, rej) => {
+                const store = getStore('asientos', 'readwrite');
+                const req = store.put(asiento);
+                req.onsuccess = () => res(asiento);
+                req.onerror = () => rej(req.error);
+            });
+        }
+
+        function eliminarAsientoDB(id) {
+            return new Promise((res, rej) => {
+                const store = getStore('asientos', 'readwrite');
+                const req = store.delete(id);
+                req.onsuccess = () => res();
+                req.onerror = () => rej(req.error);
+            });
+        }
+
+        // ==========================================================
+        // 6. FUNCIONES DE NEGOCIO
+        // ==========================================================
+        function calcularSaldos(asientos, planCuentas) {
+            const saldos = {};
+            for (const c of planCuentas) {
+                saldos[c.id] = { ...c, saldo: c.saldoInicial || 0 };
+            }
+            for (const asiento of asientos) {
+                for (const mov of asiento.movimientos) {
+                    if (saldos[mov.cuentaId]) {
+                        const cuenta = saldos[mov.cuentaId];
+                        if (cuenta.tipo === 'ACTIVO' || cuenta.tipo === 'GASTO') {
+                            cuenta.saldo += (mov.debe || 0) - (mov.haber || 0);
+                        } else {
+                            cuenta.saldo += (mov.haber || 0) - (mov.debe || 0);
+                        }
+                    }
+                }
+            }
+            return saldos;
+        }
+
+        function generarBalanceGeneral(asientos, planCuentas) {
+            const saldos = calcularSaldos(asientos, planCuentas);
+            const activos = { cortoPlazo: [], largoPlazo: [] };
+            const pasivos = { cortoPlazo: [], largoPlazo: [] };
+            const patrimonio = [];
+
+            for (const id in saldos) {
+                const c = saldos[id];
+                if (Math.abs(c.saldo) < 0.001) continue;
+                const item = { nombre: c.nombre, saldo: c.saldo };
+                if (c.tipo === 'ACTIVO') {
+                    const n = c.nombre.toLowerCase();
+                    if (n.includes('caja') || n.includes('banco') || n.includes('cliente') ||
+                        n.includes('cuenta por cobrar') || n.includes('inventario')) {
+                        activos.cortoPlazo.push(item);
+                    } else {
+                        activos.largoPlazo.push(item);
+                    }
+                } else if (c.tipo === 'PASIVO') {
+                    const n = c.nombre.toLowerCase();
+                    if (n.includes('proveedor') || n.includes('impuesto') || n.includes('cuenta por pagar')) {
+                        pasivos.cortoPlazo.push(item);
+                    } else {
+                        pasivos.largoPlazo.push(item);
+                    }
+                } else if (c.tipo === 'PATRIMONIO') {
+                    patrimonio.push(item);
+                }
+            }
+
+            const totalActivoCP = activos.cortoPlazo.reduce((s, i) => s + i.saldo, 0);
+            const totalActivoLP = activos.largoPlazo.reduce((s, i) => s + i.saldo, 0);
+            const totalPasivoCP = pasivos.cortoPlazo.reduce((s, i) => s + i.saldo, 0);
+            const totalPasivoLP = pasivos.largoPlazo.reduce((s, i) => s + i.saldo, 0);
+            const totalPatrimonio = patrimonio.reduce((s, i) => s + i.saldo, 0);
+
+            return {
+                activos,
+                pasivos,
+                patrimonio,
+                totalActivoCP,
+                totalActivoLP,
+                totalActivo: totalActivoCP + totalActivoLP,
+                totalPasivoCP,
+                totalPasivoLP,
+                totalPasivo: totalPasivoCP + totalPasivoLP,
+                totalPatrimonio,
+                totalPasivoPatrimonio: totalPasivoCP + totalPasivoLP + totalPatrimonio
+            };
+        }
+
+        function generarEstadoResultados(asientos, planCuentas) {
+            const saldos = calcularSaldos(asientos, planCuentas);
+            let ventas = 0,
+                costoVentas = 0,
+                gastosVenta = 0,
+                gastosAdmin = 0,
+                dividendos = 0,
+                interesesFavor = 0,
+                interesesCargo = 0,
+                interesesArrend = 0,
+                impuestos = 0,
+                operacionDiscontinua = 0,
+                ori = 0;
+
+            for (const id in saldos) {
+                const c = saldos[id];
+                const nombre = c.nombre.toLowerCase();
+                const saldo = c.saldo;
+
+                if (c.tipo === 'INGRESO') {
+                    if (nombre.includes('venta')) ventas += saldo;
+                    else if (nombre.includes('dividendo')) dividendos += saldo;
+                    else if (nombre.includes('interés') || nombre.includes('interes')) interesesFavor += saldo;
+                } else if (c.tipo === 'GASTO') {
+                    if (nombre.includes('costo') || nombre.includes('compra')) costoVentas += Math.abs(saldo);
+                    else if (nombre.includes('venta')) gastosVenta += Math.abs(saldo);
+                    else if (nombre.includes('admin') || nombre.includes('administración')) gastosAdmin += Math.abs(saldo);
+                    else if (nombre.includes('interés') || nombre.includes('interes')) {
+                        if (nombre.includes('arrend')) interesesArrend += Math.abs(saldo);
+                        else interesesCargo += Math.abs(saldo);
+                    } else if (nombre.includes('impuesto')) impuestos += Math.abs(saldo);
+                    else if (nombre.includes('discontinu')) operacionDiscontinua += Math.abs(saldo);
+                } else if (c.tipo === 'PATRIMONIO') {
+                    if (nombre.includes('ori') || nombre.includes('integral')) ori += saldo;
+                }
+            }
+
+            const utilidadBruta = ventas - costoVentas;
+            const utilidadOperacion = utilidadBruta - gastosVenta - gastosAdmin;
+            const utilidadAntesFinanc = utilidadOperacion + dividendos + interesesFavor;
+            const utilidadAntesImp = utilidadAntesFinanc - interesesCargo - interesesArrend;
+            const utilidadContinua = utilidadAntesImp - impuestos;
+            const utilidadNeta = utilidadContinua + operacionDiscontinua;
+            const resultadoIntegral = utilidadNeta + ori;
+
+            return {
+                ventas, costoVentas, utilidadBruta, gastosVenta, gastosAdmin, utilidadOperacion,
+                dividendos, interesesFavor, utilidadAntesFinanc,
+                interesesCargo, interesesArrend, utilidadAntesImp,
+                impuestos, utilidadContinua, operacionDiscontinua, utilidadNeta, ori, resultadoIntegral
+            };
+        }
+
+        function generarFlujoEfectivo(asientos, planCuentas) {
+            const saldos = calcularSaldos(asientos, planCuentas);
+            let cobrosClientes = 0, pagosProveedores = 0, pagosEmpleados = 0, pagoImpuestos = 0;
+            let interesesCobrados = 0, dividendosCobrados = 0, adquisicionPPE = 0, ventaPPE = 0;
+            let emisionCapital = 0, prestamosLP = 0, interesesPagados = 0, dividendosPagados = 0;
+
+            for (const asiento of asientos) {
+                for (const mov of asiento.movimientos) {
+                    const cuenta = planCuentas.find(c => c.id === mov.cuentaId);
+                    if (!cuenta) continue;
+                    const nombre = cuenta.nombre.toLowerCase();
+                    const monto = mov.debe || mov.haber || 0;
+
+                    if (nombre.includes('cliente') || nombre.includes('cuenta por cobrar')) {
+                        if (mov.debe) cobrosClientes += monto;
+                    } else if (nombre.includes('proveedor') || nombre.includes('cuenta por pagar')) {
+                        if (mov.haber) pagosProveedores += monto;
+                    } else if (nombre.includes('sueldo') || nombre.includes('personal')) {
+                        if (mov.haber) pagosEmpleados += monto;
+                    } else if (nombre.includes('impuesto')) {
+                        if (mov.haber) pagoImpuestos += monto;
+                    } else if (nombre.includes('interés') || nombre.includes('interes')) {
+                        if (mov.debe) interesesCobrados += monto;
+                        else if (mov.haber) interesesPagados += monto;
+                    } else if (nombre.includes('dividendo')) {
+                        if (mov.debe) dividendosCobrados += monto;
+                        else if (mov.haber) dividendosPagados += monto;
+                    } else if (nombre.includes('propiedad') || nombre.includes('planta') || nombre.includes('equipo')) {
+                        if (mov.debe) adquisicionPPE += monto;
+                        else if (mov.haber) ventaPPE += monto;
+                    } else if (nombre.includes('capital')) {
+                        if (mov.debe) emisionCapital += monto;
+                    } else if (nombre.includes('préstamo') || nombre.includes('prestamo')) {
+                        if (mov.debe) prestamosLP += monto;
+                    }
+                }
+            }
+
+            const flujoOperacion = cobrosClientes - pagosProveedores - pagosEmpleados - pagoImpuestos;
+            const flujoInversion = interesesCobrados + dividendosCobrados - adquisicionPPE + ventaPPE;
+            const flujoFinanciamiento = emisionCapital + prestamosLP - interesesPagados - dividendosPagados;
+            const incrementoNeto = flujoOperacion + flujoInversion + flujoFinanciamiento;
+
+            let efectivoInicial = 0;
+            for (const id in saldos) {
+                const c = saldos[id];
+                if (c.nombre.toLowerCase().includes('caja') || c.nombre.toLowerCase().includes('banco')) {
+                    efectivoInicial += (c.saldoInicial || 0);
+                }
+            }
+
+            return {
+                cobrosClientes, pagosProveedores, pagosEmpleados, pagoImpuestos, flujoOperacion,
+                interesesCobrados, dividendosCobrados, adquisicionPPE, ventaPPE, flujoInversion,
+                emisionCapital, prestamosLP, interesesPagados, dividendosPagados, flujoFinanciamiento,
+                incrementoNeto, efectivoInicial, efectivoFinal: efectivoInicial + incrementoNeto
+            };
+        }
+
+        // ==========================================================
+        // 7. GENERAR CAMBIOS EN CAPITAL (DINÁMICO)
+        // ==========================================================
+        function generarCambiosCapital(asientos, planCuentas) {
+            const saldos = calcularSaldos(asientos, planCuentas);
+            
+            let capitalSocial = 0, primaEmision = 0, utilidadesAcum = 0, ori = 0, reservas = 0;
+
+            for (const id in saldos) {
+                const c = saldos[id];
+                const nombre = c.nombre.toLowerCase();
+                if (c.tipo === 'PATRIMONIO') {
+                    if (nombre.includes('capital') && !nombre.includes('reserva') && !nombre.includes('prima')) {
+                        capitalSocial += c.saldo;
+                    } else if (nombre.includes('prima') || nombre.includes('emisión')) {
+                        primaEmision += c.saldo;
+                    } else if (nombre.includes('utilidad') || nombre.includes('resultado')) {
+                        utilidadesAcum += c.saldo;
+                    } else if (nombre.includes('ori') || nombre.includes('integral')) {
+                        ori += c.saldo;
+                    } else if (nombre.includes('reserva')) {
+                        reservas += c.saldo;
+                    }
+                }
+            }
+
+            const resultados = generarEstadoResultados(asientos, planCuentas);
+            const utilidadPeriodo = resultados.utilidadNeta || 0;
+            const oriPeriodo = resultados.ori || 0;
+
+            const movimientos = [];
+            movimientos.push({
+                concepto: 'Saldo al inicio del período',
+                capitalSocial: capitalSocial > 0 ? capitalSocial : 0,
+                primaEmision: primaEmision > 0 ? primaEmision : 0,
+                utilidadesAcum: utilidadesAcum > 0 ? utilidadesAcum : 0,
+                ori: ori > 0 ? ori : 0,
+                reservas: reservas > 0 ? reservas : 0,
+                total: capitalSocial + primaEmision + utilidadesAcum + ori + reservas
+            });
+
+            movimientos.push({
+                concepto: 'Resultado del período',
+                capitalSocial: 0,
+                primaEmision: 0,
+                utilidadesAcum: utilidadPeriodo,
+                ori: oriPeriodo,
+                reservas: 0,
+                total: utilidadPeriodo + oriPeriodo
+            });
+
+            const totalFinal = capitalSocial + primaEmision + (utilidadesAcum + utilidadPeriodo) + (ori + oriPeriodo) + reservas;
+            movimientos.push({
+                concepto: 'Saldo al final del período',
+                capitalSocial: capitalSocial,
+                primaEmision: primaEmision,
+                utilidadesAcum: utilidadesAcum + utilidadPeriodo,
+                ori: ori + oriPeriodo,
+                reservas: reservas,
+                total: totalFinal
+            });
+
+            return {
+                capitalSocial,
+                primaEmision,
+                utilidadesAcum: utilidadesAcum + utilidadPeriodo,
+                ori: ori + oriPeriodo,
+                reservas,
+                total: totalFinal,
+                movimientos,
+                utilidadPeriodo,
+                oriPeriodo
+            };
+        }
+
+        // ==========================================================
+        // 8. FUNCIONES UI
+        // ==========================================================
+        function formatearMoneda(valor) {
+            if (valor === undefined || valor === null) return '$0.00';
+            const signo = valor < 0 ? '-' : '';
+            return signo + '$' + Math.abs(valor).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+        }
+
+        function mostrarToast(msg, tipo = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = 'toast ' + tipo + ' show';
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        function cerrarModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // ==========================================================
+        // 9. RENDER: EMPRESAS
+        // ==========================================================
+        async function renderEmpresas() {
+            try {
+                const empresas = await getEmpresas();
+                const select = document.getElementById('empresaSelect');
+                const currentVal = select.value;
+                select.innerHTML = '<option value="">-- Seleccionar empresa --</option>';
+                empresas.forEach(e => {
+                    const opt = document.createElement('option');
+                    opt.value = e.id;
+                    opt.textContent = `${e.nombre} (${e.rif})`;
+                    select.appendChild(opt);
+                });
+                if (currentVal && empresas.find(e => e.id === currentVal)) {
+                    select.value = currentVal;
+                } else if (empresas.length > 0) {
+                    select.value = empresas[0].id;
+                }
+
+                const tbody = document.getElementById('empresasBody');
+                if (empresas.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" class="text-muted text-center">No hay empresas registradas</td></tr>';
+                } else {
+                    tbody.innerHTML = empresas.map(e => `
+                        <tr>
+                            <td><strong>${e.nombre}</strong></td>
+                            <td>${e.rif}</td>
+                            <td><span class="badge">${e.tipo}</span></td>
+                            <td>${e.spe ? '✅ SPE' : '❌ No'}</td>
+                            <td><button class="btn btn-primary btn-sm" onclick="seleccionarEmpresa('${e.id}')">📂 Seleccionar</button></td>
+                        </tr>
+                    `).join('');
+                }
+
+                if (select.value) {
+                    await cargarEmpresa(select.value);
+                } else {
+                    empresaActual = null;
+                    actualizarHeader();
+                    renderDashboard();
+                    renderPlanCuentas();
+                    renderHistorial();
+                    renderEstadosFinancieros();
+                }
+            } catch (e) {
+                console.error('Error renderEmpresas:', e);
+            }
+        }
+
+        function actualizarHeader() {
+            const info = document.getElementById('empresaInfo');
+            const badge = document.getElementById('empresaBadge');
+            if (empresaActual) {
+                badge.style.display = 'inline';
+                badge.textContent = empresaActual.nombre;
+                info.style.display = 'flex';
+                document.getElementById('empresaNombre').textContent = `🏢 ${empresaActual.nombre}`;
+                document.getElementById('empresaTipo').textContent = empresaActual.tipo;
+                const speBadge = document.getElementById('empresaSpe');
+                speBadge.style.display = empresaActual.spe ? 'inline' : 'none';
+                document.getElementById('dashboardEmpresa').textContent = `📊 ${empresaActual.nombre}`;
+            } else {
+                badge.style.display = 'none';
+                info.style.display = 'none';
+                document.getElementById('dashboardEmpresa').textContent = 'Selecciona una empresa';
+            }
+        }
+
+        async function cargarEmpresa(id) {
+            if (!id) {
+                empresaActual = null;
+                datosEmpresa = null;
+                actualizarHeader();
+                renderDashboard();
+                renderPlanCuentas();
+                renderHistorial();
+                renderEstadosFinancieros();
+                return;
+            }
+            try {
+                const empresas = await getEmpresas();
+                empresaActual = empresas.find(e => e.id === id);
+                if (empresaActual) {
+                    document.getElementById('empresaSelect').value = id;
+                    actualizarHeader();
+                    const planCuentas = await getPlanCuentas(id);
+                    const asientos = await getAsientos(id);
+                    datosEmpresa = { planCuentas, asientos };
+                    renderDashboard();
+                    renderPlanCuentas();
+                    renderHistorial();
+                    renderEstadosFinancieros();
+                    actualizarSelectsCuentas();
+                    mostrarToast(`✅ Empresa: ${empresaActual.nombre}`, 'success');
+                }
+            } catch (e) {
+                console.error('Error cargarEmpresa:', e);
+                mostrarToast('❌ Error al cargar empresa', 'error');
+            }
+        }
+
+        function seleccionarEmpresa(id) {
+            document.getElementById('empresaSelect').value = id;
+            cargarEmpresa(id);
+            localStorage.setItem('ultimaEmpresa', id);
+        }
+
+        function actualizarSelectsCuentas() {
+            const cuentas = datosEmpresa?.planCuentas || [];
+            document.querySelectorAll('.cuenta-select').forEach(sel => {
+                const currentVal = sel.value;
+                sel.innerHTML = '<option value="">-- Seleccionar --</option>';
+                cuentas.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.id;
+                    opt.textContent = `${c.codigo} - ${c.nombre}`;
+                    sel.appendChild(opt);
+                });
+                if (currentVal && cuentas.find(c => c.id === currentVal)) {
+                    sel.value = currentVal;
+                }
+            });
+        }
+
+        // ==========================================================
+        // 10. RENDER: DASHBOARD
+        // ==========================================================
+        function renderDashboard() {
+            const content = document.getElementById('dashboardContent');
+            if (!empresaActual || !datosEmpresa) {
+                content.innerHTML = '<p class="text-muted">Selecciona una empresa para ver el resumen.</p>';
+                return;
+            }
+            const asientos = datosEmpresa.asientos || [];
+            const planCuentas = datosEmpresa.planCuentas || [];
+            const totalAsientos = asientos.length;
+            const totalDebe = asientos.reduce((s, a) => s + a.movimientos.reduce((ss, m) => ss + (m.debe || 0), 0), 0);
+            const totalHaber = asientos.reduce((s, a) => s + a.movimientos.reduce((ss, m) => ss + (m.haber || 0), 0), 0);
+
+            const saldos = calcularSaldos(asientos, planCuentas);
+            let efectivoTotal = 0;
+            for (const id in saldos) {
+                const c = saldos[id];
+                if (c.nombre.toLowerCase().includes('caja') || c.nombre.toLowerCase().includes('banco')) {
+                    efectivoTotal += c.saldo;
+                }
+            }
+
+            content.innerHTML = `
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;">
+                    <div style="background:#f8fafc;padding:14px;border-radius:8px;text-align:center;">
+                        <div style="font-size:24px;">📝</div>
+                        <div style="font-size:22px;font-weight:700;color:#0f172a;">${totalAsientos}</div>
+                        <div class="text-muted">Total Asientos</div>
+                    </div>
+                    <div style="background:#f8fafc;padding:14px;border-radius:8px;text-align:center;">
+                        <div style="font-size:24px;">💰</div>
+                        <div style="font-size:22px;font-weight:700;color:#059669;">${formatearMoneda(efectivoTotal)}</div>
+                        <div class="text-muted">Efectivo</div>
+                    </div>
+                    <div style="background:#f8fafc;padding:14px;border-radius:8px;text-align:center;">
+                        <div style="font-size:24px;">📊</div>
+                        <div style="font-size:22px;font-weight:700;color:#1a73e8;">${formatearMoneda(totalDebe)}</div>
+                        <div class="text-muted">Total Debe</div>
+                    </div>
+                    <div style="background:#f8fafc;padding:14px;border-radius:8px;text-align:center;">
+                        <div style="font-size:24px;">📊</div>
+                        <div style="font-size:22px;font-weight:700;color:#1a73e8;">${formatearMoneda(totalHaber)}</div>
+                        <div class="text-muted">Total Haber</div>
+                    </div>
+                </div>
+            `;
+
+            const tbody = document.getElementById('ultimosAsientosBody');
+            if (asientos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" class="text-muted text-center">No hay asientos</td></tr>';
+            } else {
+                const ultimos = asientos.slice(-5).reverse();
+                tbody.innerHTML = ultimos.map(a => {
+                    const td = a.movimientos.reduce((s, m) => s + (m.debe || 0), 0);
+                    const th = a.movimientos.reduce((s, m) => s + (m.haber || 0), 0);
+                    return `<tr><td>${a.fecha}</td><td>${a.descripcion}</td><td class="font-mono">${formatearMoneda(td)}</td><td class="font-mono">${formatearMoneda(th)}</td></tr>`;
+                }).join('');
+            }
+        }
+
+        // ==========================================================
+        // 11. RENDER: PLAN DE CUENTAS
+        // ==========================================================
+        function renderPlanCuentas() {
+            const tbody = document.getElementById('planCuentasBody');
+            if (!empresaActual || !datosEmpresa) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-muted text-center">Selecciona una empresa</td></tr>';
+                return;
+            }
+            let cuentas = datosEmpresa.planCuentas || [];
+            const filtro = document.getElementById('filtroCuentas').value.toLowerCase();
+            const tipoFiltro = document.getElementById('filtroTipoCuenta').value;
+
+            if (filtro) cuentas = cuentas.filter(c => c.nombre.toLowerCase().includes(filtro) || c.codigo.includes(filtro));
+            if (tipoFiltro) cuentas = cuentas.filter(c => c.tipo === tipoFiltro);
+
+            if (cuentas.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-muted text-center">No hay cuentas</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = cuentas.map(c => `
+                <tr>
+                    <td><code>${c.codigo}</code></td>
+                    <td><strong>${c.nombre}</strong></td>
+                    <td><span class="badge">${c.tipo}</span></td>
+                    <td class="font-mono">${formatearMoneda(c.saldoInicial || 0)}</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" onclick="editarCuenta('${c.id}')">✏️</button>
+                        <button class="btn btn-danger btn-sm" onclick="eliminarCuenta('${c.id}')">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // ==========================================================
+        // 12. RENDER: HISTORIAL ASIENTOS
+        // ==========================================================
+        function renderHistorial() {
+            const tbody = document.getElementById('historialAsientosBody');
+            if (!empresaActual || !datosEmpresa) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-muted text-center">Selecciona una empresa</td></tr>';
+                return;
+            }
+            let asientos = datosEmpresa.asientos || [];
+            const desde = document.getElementById('filtroFechaDesde').value;
+            const hasta = document.getElementById('filtroFechaHasta').value;
+            if (desde) asientos = asientos.filter(a => a.fecha >= desde);
+            if (hasta) asientos = asientos.filter(a => a.fecha <= hasta);
+            asientos.sort((a, b) => b.fecha.localeCompare(a.fecha));
+
+            if (asientos.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-muted text-center">No hay asientos</td></tr>';
+                return;
+            }
+
+            const planCuentas = datosEmpresa.planCuentas || [];
+            tbody.innerHTML = asientos.map(a => {
+                const td = a.movimientos.reduce((s, m) => s + (m.debe || 0), 0);
+                const th = a.movimientos.reduce((s, m) => s + (m.haber || 0), 0);
+                const cuentasStr = a.movimientos.map(m => {
+                    const c = planCuentas.find(p => p.id === m.cuentaId);
+                    return c ? c.nombre : 'N/A';
+                }).join(', ');
+                return `<tr>
+                    <td>${a.fecha}</td>
+                    <td>${a.descripcion}</td>
+                    <td style="font-size:11px;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${cuentasStr}</td>
+                    <td class="font-mono">${formatearMoneda(td)}</td>
+                    <td class="font-mono">${formatearMoneda(th)}</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="eliminarAsiento('${a.id}')">🗑️</button></td>
+                </tr>`;
+            }).join('');
+        }
+
+        // ==========================================================
+        // 13. RENDER: ESTADOS FINANCIEROS
+        // ==========================================================
+        function renderEstadosFinancieros() {
+            if (!empresaActual || !datosEmpresa) {
+                const msg = '<p class="text-muted">Selecciona una empresa</p>';
+                document.getElementById('balanceContainer').innerHTML = msg;
+                document.getElementById('resultadosContainer').innerHTML = msg;
+                document.getElementById('flujoContainer').innerHTML = msg;
+                document.getElementById('capitalContainer').innerHTML = msg;
+                return;
+            }
+
+            const asientos = datosEmpresa.asientos || [];
+            const planCuentas = datosEmpresa.planCuentas || [];
+
+            const balance = generarBalanceGeneral(asientos, planCuentas);
+            document.getElementById('balanceContainer').innerHTML = renderBalanceHTML(balance);
+
+            const resultados = generarEstadoResultados(asientos, planCuentas);
+            document.getElementById('resultadosContainer').innerHTML = renderResultadosHTML(resultados);
+
+            const flujo = generarFlujoEfectivo(asientos, planCuentas);
+            document.getElementById('flujoContainer').innerHTML = renderFlujoHTML(flujo);
+
+            const capital = generarCambiosCapital(asientos, planCuentas);
+            document.getElementById('capitalContainer').innerHTML = renderCapitalHTML(capital);
+        }
+
+        function renderBalanceHTML(balance) {
+            const fmt = formatearMoneda;
+            return `
+                <div class="title">⚖️ Estado de Situación Financiera</div>
+                <div class="subtitle">Al 31 de diciembre de 2025</div>
+                <div class="grid-2">
+                    <div>
+                        <div class="section-title">Activos</div>
+                        <div style="font-size:12px;font-weight:600;color:#475569;border-bottom:1px solid #e2e8f0;">Corto plazo</div>
+                        ${balance.activos.cortoPlazo.map(i => `<div class="row"><span class="label">${i.nombre}</span><span class="value">${fmt(i.saldo)}</span></div>`).join('')}
+                        <div class="row total"><span class="label">Total activo corto plazo</span><span class="value">${fmt(balance.totalActivoCP)}</span></div>
+                        <div style="font-size:12px;font-weight:600;color:#475569;border-bottom:1px solid #e2e8f0;margin-top:8px;">Largo plazo</div>
+                        ${balance.activos.largoPlazo.map(i => `<div class="row"><span class="label">${i.nombre}</span><span class="value">${fmt(i.saldo)}</span></div>`).join('')}
+                        <div class="row total"><span class="label">Total activo largo plazo</span><span class="value">${fmt(balance.totalActivoLP)}</span></div>
+                        <div class="row total" style="border-top:3px double #0f172a;font-size:15px;"><span class="label">Total activo</span><span class="value">${fmt(balance.totalActivo)}</span></div>
+                    </div>
+                    <div>
+                        <div class="section-title">Pasivo y Capital</div>
+                        <div style="font-size:12px;font-weight:600;color:#475569;border-bottom:1px solid #e2e8f0;">Corto plazo</div>
+                        ${balance.pasivos.cortoPlazo.map(i => `<div class="row"><span class="label">${i.nombre}</span><span class="value">${fmt(i.saldo)}</span></div>`).join('')}
+                        <div class="row total"><span class="label">Total pasivo corto plazo</span><span class="value">${fmt(balance.totalPasivoCP)}</span></div>
+                        <div style="font-size:12px;font-weight:600;color:#475569;border-bottom:1px solid #e2e8f0;margin-top:8px;">Largo plazo</div>
+                        ${balance.pasivos.largoPlazo.map(i => `<div class="row"><span class="label">${i.nombre}</span><span class="value">${fmt(i.saldo)}</span></div>`).join('')}
+                        <div class="row total"><span class="label">Total pasivo largo plazo</span><span class="value">${fmt(balance.totalPasivoLP)}</span></div>
+                        <div class="row total"><span class="label">Total pasivo</span><span class="value">${fmt(balance.totalPasivo)}</span></div>
+                        <div style="font-size:12px;font-weight:600;color:#475569;border-bottom:1px solid #e2e8f0;margin-top:8px;">Capital contable</div>
+                        ${balance.patrimonio.map(i => `<div class="row"><span class="label">${i.nombre}</span><span class="value">${fmt(i.saldo)}</span></div>`).join('')}
+                        <div class="row total"><span class="label">Total capital</span><span class="value">${fmt(balance.totalPatrimonio)}</span></div>
+                        <div class="row total" style="border-top:3px double #0f172a;font-size:15px;"><span class="label">Total pasivo + capital</span><span class="value">${fmt(balance.totalPasivoPatrimonio)}</span></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderResultadosHTML(r) {
+            const fmt = formatearMoneda;
+            const neg = (v) => v < 0 ? `-${fmt(Math.abs(v))}` : fmt(v);
+            return `
+                <div class="title">📈 Estado de Resultados</div>
+                <div class="subtitle">Período terminado al 31/12/2025</div>
+                <div style="max-width:500px;margin:0 auto;">
+                    <div class="section-title">Operación</div>
+                    <div class="row"><span class="label">Ventas netas</span><span class="value">${fmt(r.ventas)}</span></div>
+                    <div class="row"><span class="label">Costo de ventas</span><span class="value negative">${neg(-r.costoVentas)}</span></div>
+                    <div class="row total"><span class="label">Utilidad bruta</span><span class="value">${fmt(r.utilidadBruta)}</span></div>
+                    <div class="row"><span class="label">Gastos de venta</span><span class="value negative">${neg(-r.gastosVenta)}</span></div>
+                    <div class="row"><span class="label">Gastos de administración</span><span class="value negative">${neg(-r.gastosAdmin)}</span></div>
+                    <div class="row total"><span class="label">Utilidad de operación</span><span class="value">${fmt(r.utilidadOperacion)}</span></div>
+
+                    <div class="section-title">Inversión</div>
+                    <div class="row"><span class="label">Dividendos</span><span class="value">${fmt(r.dividendos)}</span></div>
+                    <div class="row"><span class="label">Intereses a favor</span><span class="value">${fmt(r.interesesFavor)}</span></div>
+                    <div class="row total"><span class="label">Utilidad antes financiamiento</span><span class="value">${fmt(r.utilidadAntesFinanc)}</span></div>
+
+                    <div class="section-title">Financiamiento</div>
+                    <div class="row"><span class="label">Intereses a cargo</span><span class="value negative">${neg(-r.interesesCargo)}</span></div>
+                    <div class="row"><span class="label">Intereses arrendamiento</span><span class="value negative">${neg(-r.interesesArrend)}</span></div>
+                    <div class="row total"><span class="label">Utilidad antes impuestos</span><span class="value">${fmt(r.utilidadAntesImp)}</span></div>
+
+                    <div class="section-title">Impuestos</div>
+                    <div class="row"><span class="label">Impuestos a la utilidad</span><span class="value negative">${neg(-r.impuestos)}</span></div>
+                    <div class="row total"><span class="label">Utilidad de operaciones continuas</span><span class="value">${fmt(r.utilidadContinua)}</span></div>
+
+                    <div class="section-title">Operaciones discontinuadas</div>
+                    <div class="row"><span class="label">Negocio descontinuado</span><span class="value">${fmt(r.operacionDiscontinua)}</span></div>
+                    <div class="row total" style="border-top:3px double #0f172a;font-size:15px;"><span class="label">Utilidad neta</span><span class="value">${fmt(r.utilidadNeta)}</span></div>
+
+                    <div class="section-title">Otros resultados integrales</div>
+                    <div class="row"><span class="label">Remediciones</span><span class="value">${fmt(r.ori)}</span></div>
+                    <div class="row total" style="border-top:3px double #0f172a;font-size:15px;"><span class="label">Resultado integral</span><span class="value">${fmt(r.resultadoIntegral)}</span></div>
+                </div>
+            `;
+        }
+
+        function renderFlujoHTML(f) {
+            const fmt = formatearMoneda;
+            const neg = (v) => v < 0 ? `-${fmt(Math.abs(v))}` : fmt(v);
+            return `
+                <div class="title">💰 Estado de Flujos de Efectivo</div>
+                <div class="subtitle">Método Directo</div>
+                <div style="max-width:500px;margin:0 auto;">
+                    <div class="section-title">Operación</div>
+                    <div class="row"><span class="label">Cobros a clientes</span><span class="value">${fmt(f.cobrosClientes)}</span></div>
+                    <div class="row"><span class="label">Pagos a proveedores</span><span class="value negative">${neg(-f.pagosProveedores)}</span></div>
+                    <div class="row"><span class="label">Pagos a empleados</span><span class="value negative">${neg(-f.pagosEmpleados)}</span></div>
+                    <div class="row"><span class="label">Pago impuestos</span><span class="value negative">${neg(-f.pagoImpuestos)}</span></div>
+                    <div class="row total"><span class="label">Flujo neto operación</span><span class="value">${fmt(f.flujoOperacion)}</span></div>
+
+                    <div class="section-title">Inversión</div>
+                    <div class="row"><span class="label">Intereses cobrados</span><span class="value">${fmt(f.interesesCobrados)}</span></div>
+                    <div class="row"><span class="label">Dividendos cobrados</span><span class="value">${fmt(f.dividendosCobrados)}</span></div>
+                    <div class="row"><span class="label">Adquisición PPE</span><span class="value negative">${neg(-f.adquisicionPPE)}</span></div>
+                    <div class="row"><span class="label">Venta PPE</span><span class="value">${fmt(f.ventaPPE)}</span></div>
+                    <div class="row total"><span class="label">Flujo neto inversión</span><span class="value">${fmt(f.flujoInversion)}</span></div>
+
+                    <div class="section-title">Financiamiento</div>
+                    <div class="row"><span class="label">Emisión de capital</span><span class="value">${fmt(f.emisionCapital)}</span></div>
+                    <div class="row"><span class="label">Préstamos LP</span><span class="value">${fmt(f.prestamosLP)}</span></div>
+                    <div class="row"><span class="label">Intereses pagados</span><span class="value negative">${neg(-f.interesesPagados)}</span></div>
+                    <div class="row"><span class="label">Dividendos pagados</span><span class="value negative">${neg(-f.dividendosPagados)}</span></div>
+                    <div class="row total"><span class="label">Flujo neto financiamiento</span><span class="value">${fmt(f.flujoFinanciamiento)}</span></div>
+
+                    <div class="row total" style="border-top:3px double #0f172a;font-size:15px;margin-top:8px;">
+                        <span class="label">Incremento neto efectivo</span><span class="value">${fmt(f.incrementoNeto)}</span>
+                    </div>
+                    <div class="row"><span class="label">Efectivo inicial</span><span class="value">${fmt(f.efectivoInicial)}</span></div>
+                    <div class="row total" style="border-top:3px double #0f172a;font-size:15px;">
+                        <span class="label">Efectivo final</span><span class="value">${fmt(f.efectivoFinal)}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCapitalHTML(c) {
+            const fmt = formatearMoneda;
+            const headers = ['Concepto', 'Capital Social', 'Prima Emisión', 'Utilidades Acum.', 'ORI', 'Reservas', 'Total'];
+            
+            if (!c.movimientos || c.movimientos.length === 0) {
+                return `
+                    <div class="title">📊 Cambios en el Capital Contable</div>
+                    <div class="subtitle">Período terminado al 31/12/2025</div>
+                    <p class="text-muted">No hay datos suficientes para generar el estado. Registra asientos de cuentas patrimoniales.</p>
+                `;
+            }
+
+            let rows = c.movimientos.map(m => `
+                <tr>
+                    <td style="font-weight:${m.concepto.includes('Saldo')?'700':'400'};font-size:11px;">${m.concepto}</td>
+                    <td class="font-mono" style="font-size:11px;">${fmt(m.capitalSocial || 0)}</td>
+                    <td class="font-mono" style="font-size:11px;">${fmt(m.primaEmision || 0)}</td>
+                    <td class="font-mono" style="font-size:11px;">${fmt(m.utilidadesAcum || 0)}</td>
+                    <td class="font-mono" style="font-size:11px;">${fmt(m.ori || 0)}</td>
+                    <td class="font-mono" style="font-size:11px;">${fmt(m.reservas || 0)}</td>
+                    <td class="font-mono" style="font-size:11px;font-weight:700;">${fmt(m.total || 0)}</td>
+                </tr>
+            `).join('');
+
+            const ultimo = c.movimientos[c.movimientos.length - 1];
+
+            return `
+                <div class="title">📊 Cambios en el Capital Contable</div>
+                <div class="subtitle">Período terminado al 31/12/2025</div>
+                <div class="table-wrapper">
+                    <table class="capital-table" style="font-size:11px;">
+                        <thead><tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr></thead>
+                        <tbody>${rows}</tbody>
+                        <tfoot>
+                            <tr class="total-row">
+                                <td style="font-weight:700;">Saldo al final del período</td>
+                                <td class="font-mono" style="font-size:12px;font-weight:700;">${fmt(ultimo?.capitalSocial || 0)}</td>
+                                <td class="font-mono" style="font-size:12px;font-weight:700;">${fmt(ultimo?.primaEmision || 0)}</td>
+                                <td class="font-mono" style="font-size:12px;font-weight:700;">${fmt(ultimo?.utilidadesAcum || 0)}</td>
+                                <td class="font-mono" style="font-size:12px;font-weight:700;">${fmt(ultimo?.ori || 0)}</td>
+                                <td class="font-mono" style="font-size:12px;font-weight:700;">${fmt(ultimo?.reservas || 0)}</td>
+                                <td class="font-mono" style="font-size:14px;font-weight:700;">${fmt(ultimo?.total || 0)}</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                ${c.utilidadPeriodo !== undefined ? `
+                <div style="margin-top:12px;padding:10px;background:#f0fdf4;border-radius:8px;font-size:11px;">
+                    <strong>📌 Detalle del período:</strong>
+                    Utilidad Neta: ${fmt(c.utilidadPeriodo)} | ORI: ${fmt(c.oriPeriodo)} | Total Resultado Integral: ${fmt((c.utilidadPeriodo || 0) + (c.oriPeriodo || 0))}
+                </div>` : ''}
+            `;
+        }
+
+        // ==========================================================
+        // 14. FUNCIONES ASIENTOS
+        // ==========================================================
+        function agregarFilaMovimiento() {
+            const tbody = document.getElementById('movimientosBody');
+            const tr = document.createElement('tr');
+            const cuentas = datosEmpresa?.planCuentas || [];
+            const options = cuentas.map(c => `<option value="${c.id}">${c.codigo} - ${c.nombre}</option>`).join('');
+            tr.innerHTML = `
+                <td><select class="cuenta-select" required><option value="">-- Seleccionar --</option>${options}</select></td>
+                <td><input type="number" class="debe-input" step="0.01" min="0" value="0" oninput="actualizarTotales()"></td>
+                <td><input type="number" class="haber-input" step="0.01" min="0" value="0" oninput="actualizarTotales()"></td>
+                <td><button type="button" class="btn btn-danger btn-sm" onclick="eliminarFilaMovimiento(this)">✕</button></td>
+            `;
+            tbody.appendChild(tr);
+            actualizarTotales();
+        }
+
+        function eliminarFilaMovimiento(btn) {
+            const tbody = document.getElementById('movimientosBody');
+            if (tbody.children.length <= 1) {
+                mostrarToast('⚠️ Debe haber al menos una línea', 'warning');
+                return;
+            }
+            btn.closest('tr').remove();
+            actualizarTotales();
+        }
+
+        function actualizarTotales() {
+            let totalDebe = 0, totalHaber = 0;
+            document.querySelectorAll('#movimientosBody tr').forEach(tr => {
+                const debe = parseFloat(tr.querySelector('.debe-input')?.value) || 0;
+                const haber = parseFloat(tr.querySelector('.haber-input')?.value) || 0;
+                totalDebe += debe;
+                totalHaber += haber;
+            });
+            document.getElementById('totalDebe').textContent = formatearMoneda(totalDebe);
+            document.getElementById('totalHaber').textContent = formatearMoneda(totalHaber);
+            const msg = document.getElementById('balanceMsg');
+            if (Math.abs(totalDebe - totalHaber) < 0.01) {
+                msg.textContent = '✅ Balanceado: Debe = Haber';
+                msg.style.color = '#059669';
+            } else {
+                msg.textContent = `❌ Desbalanceado: Diferencia de ${formatearMoneda(Math.abs(totalDebe - totalHaber))}`;
+                msg.style.color = '#dc2626';
+            }
+        }
+
+        function limpiarFormAsiento() {
+            document.getElementById('asientoFecha').value = new Date().toISOString().slice(0, 10);
+            document.getElementById('asientoDescripcion').value = '';
+            const tbody = document.getElementById('movimientosBody');
+            tbody.innerHTML = '';
+            agregarFilaMovimiento();
+            actualizarTotales();
+        }
+
+        async function guardarAsiento(e) {
+            e.preventDefault();
+            if (!empresaActual) {
+                mostrarToast('⚠️ Selecciona una empresa', 'warning');
+                return;
+            }
+
+            const fecha = document.getElementById('asientoFecha').value;
+            const descripcion = document.getElementById('asientoDescripcion').value.trim();
+            if (!fecha || !descripcion) {
+                mostrarToast('⚠️ Fecha y descripción son obligatorias', 'warning');
+                return;
+            }
+
+            const movimientos = [];
+            let totalDebe = 0, totalHaber = 0;
+            let isValid = true;
+
+            document.querySelectorAll('#movimientosBody tr').forEach(tr => {
+                const cuentaId = tr.querySelector('.cuenta-select')?.value;
+                const debe = parseFloat(tr.querySelector('.debe-input')?.value) || 0;
+                const haber = parseFloat(tr.querySelector('.haber-input')?.value) || 0;
+
+                if (!cuentaId) { isValid = false; return; }
+                if (debe === 0 && haber === 0) { isValid = false; return; }
+                movimientos.push({ cuentaId, debe, haber });
+                totalDebe += debe;
+                totalHaber += haber;
+            });
+
+            if (!isValid || movimientos.length === 0) {
+                mostrarToast('⚠️ Cada línea debe tener cuenta y valor', 'warning');
+                return;
+            }
+
+            if (Math.abs(totalDebe - totalHaber) > 0.01) {
+                mostrarToast('⚠️ Asiento no balanceado (Debe ≠ Haber)', 'error');
+                return;
+            }
+
+            const asiento = {
+                id: generarId(),
+                empresaId: empresaActual.id,
+                fecha,
+                descripcion,
+                movimientos
+            };
+
+            try {
+                await guardarAsientoDB(asiento);
+                datosEmpresa.asientos = await getAsientos(empresaActual.id);
+                renderHistorial();
+                renderDashboard();
+                renderEstadosFinancieros();
+                limpiarFormAsiento();
+                mostrarToast('✅ Asiento guardado', 'success');
+            } catch (err) {
+                mostrarToast('❌ Error: ' + err.message, 'error');
+            }
+        }
+
+        async function eliminarAsiento(id) {
+            if (!confirm('¿Eliminar este asiento?')) return;
+            try {
+                await eliminarAsientoDB(id);
+                datosEmpresa.asientos = await getAsientos(empresaActual.id);
+                renderHistorial();
+                renderDashboard();
+                renderEstadosFinancieros();
+                mostrarToast('✅ Asiento eliminado', 'success');
+            } catch (e) {
+                mostrarToast('❌ Error: ' + e.message, 'error');
+            }
+        }
+
+        // ==========================================================
+        // 15. FUNCIONES MODALES
+        // ==========================================================
+        function abrirModalEmpresa() {
+            document.getElementById('modalEmpresaTitle').textContent = '🏢 Nueva Empresa';
+            document.getElementById('formEmpresa').reset();
+            document.getElementById('empresaEditId').value = '';
+            document.getElementById('empPeriodo').value = '2026-01';
+            document.getElementById('empSpe').checked = false;
+            document.getElementById('modalEmpresa').classList.add('active');
+        }
+
+        function editarEmpresa() {
+            if (!empresaActual) {
+                mostrarToast('⚠️ Selecciona una empresa', 'warning');
+                return;
+            }
+            document.getElementById('modalEmpresaTitle').textContent = '✏️ Editar Empresa';
+            document.getElementById('empresaEditId').value = empresaActual.id;
+            document.getElementById('empNombre').value = empresaActual.nombre || '';
+            document.getElementById('empRif').value = empresaActual.rif || '';
+            document.getElementById('empTipo').value = empresaActual.tipo || 'comercial';
+            document.getElementById('empPeriodo').value = empresaActual.periodo || '2026-01';
+            document.getElementById('empMoneda').value = empresaActual.moneda || 'VES';
+            document.getElementById('empSpe').checked = empresaActual.spe || false;
+            document.getElementById('modalEmpresa').classList.add('active');
+        }
+
+        async function eliminarEmpresa() {
+            if (!empresaActual) {
+                mostrarToast('⚠️ Selecciona una empresa', 'warning');
+                return;
+            }
+            if (!confirm(`¿Eliminar "${empresaActual.nombre}" y todos sus datos?`)) return;
+            try {
+                await eliminarEmpresaDB(empresaActual.id);
+                const cuentas = await getPlanCuentas(empresaActual.id);
+                for (const c of cuentas) await eliminarCuentaDB(c.id);
+                const asientos = await getAsientos(empresaActual.id);
+                for (const a of asientos) await eliminarAsientoDB(a.id);
+                empresaActual = null;
+                datosEmpresa = null;
+                await renderEmpresas();
+                mostrarToast('✅ Empresa eliminada', 'success');
+            } catch (e) {
+                mostrarToast('❌ Error: ' + e.message, 'error');
+            }
+        }
+
+        async function guardarEmpresa(e) {
+            e.preventDefault();
+            const id = document.getElementById('empresaEditId').value || generarId();
+            const nombre = document.getElementById('empNombre').value.trim();
+            const rif = document.getElementById('empRif').value.trim();
+            const tipo = document.getElementById('empTipo').value;
+            const periodo = document.getElementById('empPeriodo').value;
+            const moneda = document.getElementById('empMoneda').value;
+            const spe = document.getElementById('empSpe').checked;
+
+            if (!nombre || !rif) {
+                mostrarToast('⚠️ Nombre y RIF son obligatorios', 'warning');
+                return;
+            }
+
+            const empresa = { id, nombre, rif, tipo, periodo, moneda, spe };
+            try {
+                const empresas = await getEmpresas();
+                const duplicado = empresas.find(e => e.rif === rif && e.id !== id);
+                if (duplicado) {
+                    mostrarToast('⚠️ Ya existe una empresa con ese RIF', 'warning');
+                    return;
+                }
+                await guardarEmpresaDB(empresa);
+                cerrarModal('modalEmpresa');
+
+                if (!document.getElementById('empresaEditId').value) {
+                    await cargarPlanPredeterminadoParaEmpresa(id, tipo);
+                    mostrarToast(`✅ Empresa creada con plan ${tipo}`, 'success');
+                } else {
+                    mostrarToast('✅ Empresa actualizada', 'success');
+                }
+
+                await renderEmpresas();
+                document.getElementById('empresaSelect').value = id;
+                await cargarEmpresa(id);
+                localStorage.setItem('ultimaEmpresa', id);
+            } catch (e) {
+                mostrarToast('❌ Error: ' + e.message, 'error');
+            }
+        }
+
+        // ==========================================================
+        // 16. FUNCIONES CUENTAS
+        // ==========================================================
+        function abrirModalCuenta() {
+            if (!empresaActual) {
+                mostrarToast('⚠️ Selecciona una empresa', 'warning');
+                return;
+            }
+            document.getElementById('modalCuentaTitle').textContent = '📚 Nueva Cuenta';
+            document.getElementById('formCuenta').reset();
+            document.getElementById('cuentaEditId').value = '';
+            document.getElementById('cuentaSaldoInicial').value = '0';
+            document.getElementById('modalCuenta').classList.add('active');
+        }
+
+        function editarCuenta(id) {
+            const cuentas = datosEmpresa?.planCuentas || [];
+            const cuenta = cuentas.find(c => c.id === id);
+            if (!cuenta) return;
+            document.getElementById('modalCuentaTitle').textContent = '✏️ Editar Cuenta';
+            document.getElementById('cuentaEditId').value = cuenta.id;
+            document.getElementById('cuentaCodigo').value = cuenta.codigo;
+            document.getElementById('cuentaNombre').value = cuenta.nombre;
+            document.getElementById('cuentaTipo').value = cuenta.tipo;
+            document.getElementById('cuentaSaldoInicial').value = cuenta.saldoInicial || 0;
+            document.getElementById('modalCuenta').classList.add('active');
+        }
+
+        async function eliminarCuenta(id) {
+            if (!confirm('¿Eliminar esta cuenta?')) return;
+            try {
+                await eliminarCuentaDB(id);
+                datosEmpresa.planCuentas = await getPlanCuentas(empresaActual.id);
+                renderPlanCuentas();
+                renderEstadosFinancieros();
+                actualizarSelectsCuentas();
+                mostrarToast('✅ Cuenta eliminada', 'success');
+            } catch (e) {
+                mostrarToast('❌ Error: ' + e.message, 'error');
+            }
+        }
+
+        async function guardarCuenta(e) {
+            e.preventDefault();
+            if (!empresaActual) {
+                mostrarToast('⚠️ Selecciona una empresa', 'warning');
+                return;
+            }
+            const id = document.getElementById('cuentaEditId').value || generarId();
+            const codigo = document.getElementById('cuentaCodigo').value.trim();
+            const nombre = document.getElementById('cuentaNombre').value.trim();
+            const tipo = document.getElementById('cuentaTipo').value;
+            const saldoInicial = parseFloat(document.getElementById('cuentaSaldoInicial').value) || 0;
+
+            if (!codigo || !nombre) {
+                mostrarToast('⚠️ Código y nombre son obligatorios', 'warning');
+                return;
+            }
+
+            const cuenta = { id, empresaId: empresaActual.id, codigo, nombre, tipo, saldoInicial };
+            try {
+                await guardarCuentaDB(cuenta);
+                cerrarModal('modalCuenta');
+                datosEmpresa.planCuentas = await getPlanCuentas(empresaActual.id);
+                renderPlanCuentas();
+                renderEstadosFinancieros();
+                actualizarSelectsCuentas();
+                mostrarToast('✅ Cuenta guardada', 'success');
+            } catch (e) {
+                mostrarToast('❌ Error: ' + e.message, 'error');
+            }
+        }
+
+        async function cargarPlanPredeterminado() {
+            if (!empresaActual) {
+                mostrarToast('⚠️ Selecciona una empresa', 'warning');
+                return;
+            }
+            if (!confirm(`¿Cargar plan predeterminado para "${empresaActual.tipo}"?`)) return;
+            try {
+                const cuentas = await getPlanCuentas(empresaActual.id);
+                for (const c of cuentas) await eliminarCuentaDB(c.id);
+                await cargarPlanPredeterminadoParaEmpresa(empresaActual.id, empresaActual.tipo);
+                datosEmpresa.planCuentas = await getPlanCuentas(empresaActual.id);
+                renderPlanCuentas();
+                renderEstadosFinancieros();
+                actualizarSelectsCuentas();
+                mostrarToast(`✅ Plan ${empresaActual.tipo} cargado`, 'success');
+            } catch (e) {
+                mostrarToast('❌ Error: ' + e.message, 'error');
+            }
+        }
+
+        // ==========================================================
+        // 17. EXPORTACIÓN CORREGIDA (PDF y Excel)
+        // ==========================================================
+
+        function exportarSeleccionado() {
+            const modulo = document.getElementById('exportModulo').value;
+            const formato = document.getElementById('exportFormato').value;
+            if (!empresaActual) {
+                mostrarToast('⚠️ Selecciona una empresa', 'warning');
+                return;
+            }
+            if (formato === 'excel') {
+                exportarExcel(modulo);
+            } else {
+                exportarPDF(modulo);
+            }
+        }
+
+        function exportarExcel(modulo) {
+            const asientos = datosEmpresa?.asientos || [];
+            const planCuentas = datosEmpresa?.planCuentas || [];
+            let data = [];
+            let nombreArchivo = '';
+
+            try {
+                if (modulo === 'asientos') {
+                    data = asientos.map(a => {
+                        const movStr = a.movimientos.map(m => {
+                            const c = planCuentas.find(p => p.id === m.cuentaId);
+                            return `${c?.nombre||'N/A'}: D${m.debe||0} H${m.haber||0}`;
+                        }).join('; ');
+                        return { Fecha: a.fecha, Descripción: a.descripcion, Movimientos: movStr };
+                    });
+                    nombreArchivo = 'Libro_Diario';
+                } else if (modulo === 'planCuentas') {
+                    data = planCuentas.map(c => ({ 
+                        Código: c.codigo, 
+                        Nombre: c.nombre, 
+                        Tipo: c.tipo, 
+                        'Saldo Inicial': c.saldoInicial || 0 
+                    }));
+                    nombreArchivo = 'Plan_Cuentas';
+                } else if (modulo === 'balance') {
+                    const b = generarBalanceGeneral(asientos, planCuentas);
+                    data = [
+                        { Concepto: 'Total Activo Corto Plazo', Valor: b.totalActivoCP },
+                        { Concepto: 'Total Activo Largo Plazo', Valor: b.totalActivoLP },
+                        { Concepto: 'Total Activo', Valor: b.totalActivo },
+                        { Concepto: 'Total Pasivo Corto Plazo', Valor: b.totalPasivoCP },
+                        { Concepto: 'Total Pasivo Largo Plazo', Valor: b.totalPasivoLP },
+                        { Concepto: 'Total Pasivo', Valor: b.totalPasivo },
+                        { Concepto: 'Total Patrimonio', Valor: b.totalPatrimonio },
+                        { Concepto: 'Total Pasivo + Patrimonio', Valor: b.totalPasivoPatrimonio },
+                    ];
+                    nombreArchivo = 'Balance_General';
+                } else if (modulo === 'resultados') {
+                    const r = generarEstadoResultados(asientos, planCuentas);
+                    data = [
+                        { Concepto: 'Ventas', Valor: r.ventas },
+                        { Concepto: 'Costo Ventas', Valor: r.costoVentas },
+                        { Concepto: 'Utilidad Bruta', Valor: r.utilidadBruta },
+                        { Concepto: 'Gastos Venta', Valor: r.gastosVenta },
+                        { Concepto: 'Gastos Admin', Valor: r.gastosAdmin },
+                        { Concepto: 'Utilidad Operación', Valor: r.utilidadOperacion },
+                        { Concepto: 'Utilidad Antes Impuestos', Valor: r.utilidadAntesImp },
+                        { Concepto: 'Impuestos', Valor: r.impuestos },
+                        { Concepto: 'Utilidad Neta', Valor: r.utilidadNeta },
+                        { Concepto: 'Resultado Integral', Valor: r.resultadoIntegral },
+                    ];
+                    nombreArchivo = 'Estado_Resultados';
+                } else if (modulo === 'flujo') {
+                    const f = generarFlujoEfectivo(asientos, planCuentas);
+                    data = [
+                        { Concepto: 'Flujo Operación', Valor: f.flujoOperacion },
+                        { Concepto: 'Flujo Inversión', Valor: f.flujoInversion },
+                        { Concepto: 'Flujo Financiamiento', Valor: f.flujoFinanciamiento },
+                        { Concepto: 'Incremento Neto', Valor: f.incrementoNeto },
+                        { Concepto: 'Efectivo Inicial', Valor: f.efectivoInicial },
+                        { Concepto: 'Efectivo Final', Valor: f.efectivoFinal },
+                    ];
+                    nombreArchivo = 'Flujo_Efectivo';
+                } else if (modulo === 'capital') {
+                    const c = generarCambiosCapital(asientos, planCuentas);
+                    data = c.movimientos.map(m => ({
+                        Concepto: m.concepto,
+                        Capital: m.capitalSocial,
+                        Prima: m.primaEmision,
+                        Utilidades: m.utilidadesAcum,
+                        ORI: m.ori,
+                        Reservas: m.reservas,
+                        Total: m.total
+                    }));
+                    nombreArchivo = 'Cambios_Capital';
+                } else {
+                    mostrarToast('⚠️ Módulo no válido', 'warning');
+                    return;
+                }
+
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.json_to_sheet(data);
+                XLSX.utils.book_append_sheet(wb, ws, 'Datos');
+                XLSX.writeFile(wb, `${nombreArchivo}_${empresaActual.nombre}_${new Date().toISOString().slice(0,10)}.xlsx`);
+                mostrarToast(`✅ Excel exportado: ${nombreArchivo}`, 'success');
+            } catch (e) {
+                console.error('Error exportando Excel:', e);
+                mostrarToast('❌ Error al exportar Excel: ' + e.message, 'error');
+            }
+        }
+
+        // ==========================================================
+        // 17b. EXPORTAR PDF - VERSIÓN CORREGIDA
+        // ==========================================================
+        function exportarPDF(modulo) {
+            let containerId;
+            switch(modulo) {
+                case 'balance': containerId = 'balanceContainer'; break;
+                case 'resultados': containerId = 'resultadosContainer'; break;
+                case 'flujo': containerId = 'flujoContainer'; break;
+                case 'capital': containerId = 'capitalContainer'; break;
+                default: containerId = 'resultadosContainer';
+            }
+            
+            const container = document.getElementById(containerId);
+            if (!container) {
+                mostrarToast('⚠️ No se encontró el contenedor', 'warning');
+                return;
+            }
+
+            if (container.innerHTML.includes('Selecciona una empresa') || 
+                container.innerHTML.includes('No hay datos') ||
+                container.innerHTML.includes('No hay asientos')) {
+                mostrarToast('⚠️ No hay datos para exportar. Registra asientos primero.', 'warning');
+                return;
+            }
+
+            const hasContent = container.querySelector('.title') || 
+                               container.querySelector('.row') || 
+                               container.querySelector('table') ||
+                               container.querySelector('.grid-2');
+            if (!hasContent) {
+                mostrarToast('⚠️ El estado financiero está vacío. Registra asientos primero.', 'warning');
+                return;
+            }
+
+            mostrarToast('📄 Generando PDF... Por favor espera.', 'info');
+
+            // Crear un clon del contenedor para evitar problemas de renderizado
+            const clone = container.cloneNode(true);
+            clone.style.width = '100%';
+            clone.style.padding = '20px';
+            clone.style.background = '#ffffff';
+            clone.style.borderRadius = '0';
+            clone.style.border = 'none';
+            clone.style.boxShadow = 'none';
+            
+            clone.querySelectorAll('.btn, .toolbar, .no-print, button, .modal-overlay').forEach(el => {
+                el.style.display = 'none';
+            });
+
+            const tempDiv = document.createElement('div');
+            tempDiv.style.position = 'fixed';
+            tempDiv.style.left = '-9999px';
+            tempDiv.style.top = '0';
+            tempDiv.style.width = '900px';
+            tempDiv.style.background = '#ffffff';
+            tempDiv.style.padding = '20px';
+            tempDiv.style.zIndex = '-1';
+            tempDiv.appendChild(clone);
+            document.body.appendChild(tempDiv);
+
+            setTimeout(() => {
+                const options = {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    useCORS: true,
+                    allowTaint: false,
+                    width: tempDiv.scrollWidth || 900,
+                    height: tempDiv.scrollHeight || 800,
+                    onclone: function(document) {
+                        const elements = document.querySelectorAll('*');
+                        elements.forEach(el => {
+                            if (el.style.display === 'none') {
+                                el.style.display = '';
+                            }
+                        });
+                    }
+                };
+
+                html2canvas(tempDiv, options)
+                    .then(canvas => {
+                        try {
+                            document.body.removeChild(tempDiv);
+                            
+                            const imgData = canvas.toDataURL('image/png', 1.0);
+                            const { jsPDF } = window.jspdf;
+                            const pdf = new jsPDF('p', 'mm', 'a4');
+                            const pdfWidth = pdf.internal.pageSize.getWidth();
+                            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                            
+                            const maxHeight = pdf.internal.pageSize.getHeight();
+                            let finalHeight = pdfHeight;
+                            if (pdfHeight > maxHeight) {
+                                const scaleFactor = maxHeight / pdfHeight;
+                                finalHeight = maxHeight;
+                                const newWidth = pdfWidth * scaleFactor;
+                                pdf.addImage(imgData, 'PNG', (pdfWidth - newWidth) / 2, 0, newWidth, finalHeight);
+                            } else {
+                                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, finalHeight);
+                            }
+                            
+                            const nombreEstado = {
+                                'balance': 'Balance_General',
+                                'resultados': 'Estado_Resultados',
+                                'flujo': 'Flujo_Efectivo',
+                                'capital': 'Cambios_Capital'
+                            }[modulo] || 'Estado_Financiero';
+                            
+                            pdf.save(`${nombreEstado}_${empresaActual.nombre}_${new Date().toISOString().slice(0,10)}.pdf`);
+                            mostrarToast('✅ PDF exportado correctamente', 'success');
+                        } catch (err) {
+                            console.error('Error al guardar PDF:', err);
+                            if (document.body.contains(tempDiv)) document.body.removeChild(tempDiv);
+                            mostrarToast('❌ Error al guardar PDF: ' + err.message, 'error');
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error html2canvas:', err);
+                        if (document.body.contains(tempDiv)) document.body.removeChild(tempDiv);
+                        
+                        mostrarToast('⚠️ Intentando método alternativo...', 'warning');
+                        
+                        html2canvas(container, {
+                            scale: 1.5,
+                            backgroundColor: '#ffffff',
+                            logging: false,
+                            useCORS: true
+                        }).then(canvas => {
+                            try {
+                                const imgData = canvas.toDataURL('image/png', 0.9);
+                                const { jsPDF } = window.jspdf;
+                                const pdf = new jsPDF('p', 'mm', 'a4');
+                                const pdfWidth = pdf.internal.pageSize.getWidth();
+                                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                                
+                                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                                
+                                const nombreEstado = {
+                                    'balance': 'Balance_General',
+                                    'resultados': 'Estado_Resultados',
+                                    'flujo': 'Flujo_Efectivo',
+                                    'capital': 'Cambios_Capital'
+                                }[modulo] || 'Estado_Financiero';
+                                
+                                pdf.save(`${nombreEstado}_${empresaActual.nombre}_${new Date().toISOString().slice(0,10)}.pdf`);
+                                mostrarToast('✅ PDF exportado (método alternativo)', 'success');
+                            } catch (err2) {
+                                console.error('Error en método alternativo:', err2);
+                                mostrarToast('❌ Error al exportar PDF: ' + err2.message, 'error');
+                            }
+                        }).catch(err2 => {
+                            console.error('Error en método alternativo:', err2);
+                            mostrarToast('❌ Error al exportar PDF: ' + err2.message, 'error');
+                        });
+                    });
+            }, 300);
+        }
+
+        // ==========================================================
+        // 17c. FUNCIONES RÁPIDAS PARA EXPORTAR DESDE ESTADOS
+        // ==========================================================
+        function exportarEstadoExcel() {
+            let modulo = 'resultados';
+            const containers = ['balanceContainer', 'resultadosContainer', 'flujoContainer', 'capitalContainer'];
+            for (const id of containers) {
+                const el = document.getElementById(id);
+                if (el && el.offsetParent !== null) {
+                    modulo = id.replace('Container', '');
+                    break;
+                }
+            }
+            exportarExcel(modulo);
+        }
+
+        function exportarEstadoPDF() {
+            let modulo = 'resultados';
+            const containers = ['balanceContainer', 'resultadosContainer', 'flujoContainer', 'capitalContainer'];
+            for (const id of containers) {
+                const el = document.getElementById(id);
+                if (el && el.offsetParent !== null) {
+                    modulo = id.replace('Container', '');
+                    break;
+                }
+            }
+            exportarPDF(modulo);
+        }
+
+        // ==========================================================
+        // 18. RESPALDOS COMPLETOS
+        // ==========================================================
+        async function generarRespaldo() {
+            try {
+                const tipo = document.getElementById('respaldoTipo').value;
+                
+                const empresas = await getEmpresas();
+                const planCuentas = await getDataAll('planCuentas');
+                const asientos = await getDataAll('asientos');
+                const configuracion = await getConfiguracionAll();
+                const licencia = {
+                    serial: localStorage.getItem('licencia_serial') || null,
+                    tipo: localStorage.getItem('licencia_tipo') || 'DEMO',
+                    activada: !!localStorage.getItem('licencia_serial')
+                };
+
+                let respaldo = {
+                    version: '2.1',
+                    fecha: new Date().toISOString(),
+                    tipo: tipo,
+                    metadata: {
+                        totalEmpresas: empresas.length,
+                        totalCuentas: planCuentas.length,
+                        totalAsientos: asientos.length,
+                        empresas: empresas.map(e => e.nombre)
+                    }
+                };
+
+                if (tipo === 'completo' || tipo === 'empresas') {
+                    respaldo.empresas = empresas;
+                }
+                if (tipo === 'completo' || tipo === 'contable') {
+                    respaldo.planCuentas = planCuentas;
+                    respaldo.asientos = asientos;
+                    respaldo.configuracion = configuracion;
+                }
+                if (tipo === 'completo') {
+                    respaldo.licencia = licencia;
+                }
+
+                const blobData = new Blob([JSON.stringify(respaldo)], { type: 'application/json' });
+                await guardarHistorialRespaldo({
+                    fecha: respaldo.fecha,
+                    tipo: tipo,
+                    empresas: empresas.map(e => e.nombre).join(', '),
+                    registros: respaldo.metadata.totalAsientos || 0,
+                    tamano: blobData.size
+                });
+
+                const url = URL.createObjectURL(blobData);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `respaldo_${new Date().toISOString().slice(0,10)}_${empresaActual?.nombre || 'general'}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                setTimeout(() => URL.revokeObjectURL(url), 5000);
+
+                mostrarToast(`✅ Respaldo ${tipo} descargado correctamente`, 'success');
+                renderHistorialRespaldos();
+                
+                document.getElementById('ultimoRespaldo').textContent = new Date().toLocaleString();
+                document.getElementById('tamanoRespaldo').textContent = (blobData.size / 1024).toFixed(2) + ' KB';
+
+            } catch (e) {
+                console.error('Error al generar respaldo:', e);
+                mostrarToast('❌ Error al generar respaldo: ' + e.message, 'error');
+            }
+        }
+
+        function getDataAll(storeName) {
+            return new Promise((res) => {
+                try {
+                    const store = getStore(storeName);
+                    const req = store.getAll();
+                    req.onsuccess = () => res(req.result || []);
+                    req.onerror = () => res([]);
+                } catch (e) { res([]); }
+            });
+        }
+
+        function getConfiguracionAll() {
+            return new Promise((res) => {
+                try {
+                    const store = getStore('configuracion');
+                    const req = store.getAll();
+                    req.onsuccess = () => {
+                        const result = {};
+                        (req.result || []).forEach(item => { result[item.key] = item.valor; });
+                        res(result);
+                    };
+                    req.onerror = () => res({});
+                } catch (e) { res({}); }
+            });
+        }
+
+        function guardarHistorialRespaldo(entry) {
+            return new Promise((res) => {
+                try {
+                    const store = getStore('historialRespaldos', 'readwrite');
+                    const req = store.add({ ...entry, id: Date.now() });
+                    req.onsuccess = () => res();
+                    req.onerror = () => res();
+                } catch (e) { res(); }
+            });
+        }
+
+        function getHistorialRespaldos() {
+            return new Promise((res) => {
+                try {
+                    const store = getStore('historialRespaldos');
+                    const req = store.getAll();
+                    req.onsuccess = () => res(req.result || []);
+                    req.onerror = () => res([]);
+                } catch (e) { res([]); }
+            });
+        }
+
+        function eliminarHistorialRespaldo(id) {
+            return new Promise((res) => {
+                try {
+                    const store = getStore('historialRespaldos', 'readwrite');
+                    const req = store.delete(id);
+                    req.onsuccess = () => res();
+                    req.onerror = () => res();
+                } catch (e) { res(); }
+            });
+        }
+
+        async function renderHistorialRespaldos() {
+            const historial = await getHistorialRespaldos();
+            const tbody = document.getElementById('historialRespaldosBody');
+            if (historial.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-muted text-center">No hay respaldos guardados</td></tr>';
+                return;
+            }
+            tbody.innerHTML = historial.sort((a, b) => b.fecha.localeCompare(a.fecha)).slice(0, 20).map(h => `
+                <tr>
+                    <td>${new Date(h.fecha).toLocaleString()}</td>
+                    <td>${h.empresas || 'N/A'}</td>
+                    <td>${(h.tamano / 1024).toFixed(2)} KB</td>
+                    <td>${h.registros || 0}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="eliminarHistorialRespaldo(${h.id})">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function limpiarHistorialRespaldos() {
+            if (!confirm('¿Eliminar todo el historial de respaldos?')) return;
+            const historial = await getHistorialRespaldos();
+            for (const h of historial) {
+                await eliminarHistorialRespaldo(h.id);
+            }
+            renderHistorialRespaldos();
+            mostrarToast('✅ Historial limpiado', 'success');
+        }
+
+        async function restaurarRespaldo(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+
+                if (!data.version || !data.fecha) {
+                    throw new Error('Formato de respaldo inválido');
+                }
+
+                const confirmar = confirm(
+                    `⚠️ ¿Restaurar respaldo del ${new Date(data.fecha).toLocaleString()}?\n\n` +
+                    `Contiene:\n` +
+                    `- ${data.metadata?.totalEmpresas || 0} empresas\n` +
+                    `- ${data.metadata?.totalCuentas || 0} cuentas\n` +
+                    `- ${data.metadata?.totalAsientos || 0} asientos\n\n` +
+                    `Se reemplazarán los datos actuales. ¿Continuar?`
+                );
+
+                if (!confirmar) return;
+
+                if (data.empresas) {
+                    const empresas = await getEmpresas();
+                    for (const e of empresas) await eliminarEmpresaDB(e.id);
+                    for (const e of data.empresas) await guardarEmpresaDB(e);
+                }
+
+                if (data.planCuentas) {
+                    const cuentas = await getDataAll('planCuentas');
+                    for (const c of cuentas) await eliminarCuentaDB(c.id);
+                    for (const c of data.planCuentas) await guardarCuentaDB(c);
+                }
+
+                if (data.asientos) {
+                    const asientos = await getDataAll('asientos');
+                    for (const a of asientos) await eliminarAsientoDB(a.id);
+                    for (const a of data.asientos) await guardarAsientoDB(a);
+                }
+
+                if (data.configuracion) {
+                    for (const [key, valor] of Object.entries(data.configuracion)) {
+                        await guardarConfiguracion(key, valor);
+                    }
+                }
+
+                if (data.licencia && data.licencia.serial) {
+                    localStorage.setItem('licencia_serial', data.licencia.serial);
+                    localStorage.setItem('licencia_tipo', data.licencia.tipo || 'DEMO');
+                }
+
+                await renderEmpresas();
+                mostrarToast('✅ Respaldo restaurado correctamente', 'success');
+
+            } catch (e) {
+                console.error('Error al restaurar:', e);
+                mostrarToast('❌ Error al restaurar: ' + e.message, 'error');
+            }
+
+            event.target.value = '';
+        }
+
+        // ==========================================================
+        // 19. NAVEGACIÓN
+        // ==========================================================
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                this.classList.add('active');
+                const tab = this.dataset.tab;
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                const target = document.getElementById('tab-' + tab);
+                if (target) target.classList.add('active');
+                document.getElementById('pageTitle').textContent = this.querySelector('.nav-text')?.textContent || '📊';
+                
+                if (tab === 'respaldo') {
+                    renderHistorialRespaldos();
+                }
+            });
+        });
+
+        document.getElementById('empresaSelect').addEventListener('change', function() {
+            cargarEmpresa(this.value);
+            if (this.value) localStorage.setItem('ultimaEmpresa', this.value);
+        });
+
+        // ==========================================================
+        // 20. INICIALIZACIÓN
+        // ==========================================================
+        async function init() {
+            try {
+                await abrirDB();
+                document.getElementById('asientoFecha').value = new Date().toISOString().slice(0, 10);
+                agregarFilaMovimiento();
+                await renderEmpresas();
+                await renderHistorialRespaldos();
+
+                const ultima = localStorage.getItem('ultimaEmpresa');
+                if (ultima) {
+                    const select = document.getElementById('empresaSelect');
+                    if ([...select.options].some(o => o.value === ultima)) {
+                        select.value = ultima;
+                        await cargarEmpresa(ultima);
+                    }
+                }
+                
+                document.getElementById('ultimoRespaldo').textContent = 'No hay respaldo previo';
+                
+                mostrarToast('🚀 ContaPro+ ULTRA v2.1 cargado', 'success');
+            } catch (e) {
+                console.error('Error init:', e);
+                mostrarToast('❌ Error al iniciar: ' + e.message, 'error');
+                renderEmpresas();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
